@@ -53,6 +53,7 @@ public class LightsApplicationService {
             if(light.isPresent()) {
                 lightAction.on(light.get());
                 lightsRepository.save(light.get());
+                return;
             }
             throw new LightNotFoundException(applianceId);
         }
