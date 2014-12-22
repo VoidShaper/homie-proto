@@ -1,6 +1,7 @@
 package com.thoughtcrafters.homie.infrastructure.http;
 
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
+import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Room;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.jersey.params.UUIDParam;
@@ -26,7 +27,7 @@ public class RoomsResource {
     public Response createRoom(@Valid NewRoomRequest request) {
         Room room = roomsApplicationService.createRoomWith(request.getName());
         return Response.created(UriBuilder.fromPath(room.id().uuid().toString()).build())
-                .build();
+                       .build();
     }
 
     @GET
@@ -34,5 +35,14 @@ public class RoomsResource {
     public RoomResponse getRoom(@PathParam("roomId") UUIDParam roomId) {
         Room room = roomsApplicationService.getTheRoomWith(new RoomId(roomId.get()));
         return RoomResponse.from(room);
+    }
+
+    @POST
+    @Path("/{roomId}/add/{applianceId}")
+    public Response addApplianceToRoom(@PathParam("roomId") UUIDParam roomId,
+                                       @PathParam("applianceId") UUIDParam applianceId) {
+        roomsApplicationService.addApplianceToRoom(new ApplianceId(applianceId.get()),
+                                                   new RoomId(roomId.get()));
+        return Response.noContent().build();
     }
 }

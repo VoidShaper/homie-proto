@@ -2,6 +2,7 @@ package com.thoughtcrafters.homie.infrastructure.persistence;
 
 import com.thoughtcrafters.homie.domain.rooms.Room;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
+import com.thoughtcrafters.homie.domain.rooms.RoomNotFoundException;
 import com.thoughtcrafters.homie.domain.rooms.RoomsRepository;
 
 import java.util.HashMap;
@@ -31,6 +32,15 @@ public class HashMapRoomsRepository implements RoomsRepository {
         Room room = new Room(roomId, name, emptySet());
         rooms.put(roomId, room);
         return copyOf(room);
+    }
+
+    @Override
+    public void save(Room room) {
+        checkNotNull(room);
+        if(!rooms.containsKey(room.id())) {
+            throw new RoomNotFoundException(room.id());
+        }
+        rooms.put(room.id(), copyOf(room));
     }
 
     private Room copyOf(Room room) {

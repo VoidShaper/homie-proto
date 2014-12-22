@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.thoughtcrafters.homie.HomieApplication;
-import com.thoughtcrafters.homie.HomieConfguration;
-import com.thoughtcrafters.homie.TestUtils;
+import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.eclipse.jetty.http.HttpStatus;
@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.thoughtcrafters.homie.TestUtils.UUID_REGEX;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RoomsAcceptanceTest extends AcceptanceTest {
 
     @ClassRule
-    public static final DropwizardAppRule<HomieConfguration> app =
+    public static final DropwizardAppRule<HomieConfiguration> app =
             new DropwizardAppRule<>(HomieApplication.class, "homie.yml");
 
     @Test
@@ -68,8 +69,37 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                 ));
     }
 
+    @Test
+    public void addsAnApplianceToTheRoom() throws JsonProcessingException {
+        // given
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", SwitchState.ON);
+        RoomId id = aRoomHasBeenCreatedWith("aRoomName");
+
+        // when
+        ClientResponse response = Client.create()
+                .resource(format("http://localhost:%d/rooms/%s/add/%s",
+                        app.getLocalPort(), id.uuid(), lightId.uuid()))
+                .post(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
+
+        assertThat(aRoomResponseFor(id))
+                .isEqualTo(ImmutableMap.of(
+                        "name", "aRoomName",
+                        "appliances", newArrayList(lightId.uuid().toString())
+                ));
+
+        assertThat(aLightResponseFor(lightId))
+                .isEqualTo(ImmutableMap.of(
+                        "name", "lightName",
+                        "switchState", "ON",
+                        "roomId", id.uuid().toString()
+                ));
+    }
+
     @Override
-    public DropwizardAppRule<HomieConfguration> app() {
+    public DropwizardAppRule<HomieConfiguration> app() {
         return app;
     }
 }

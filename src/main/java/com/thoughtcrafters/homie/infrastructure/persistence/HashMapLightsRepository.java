@@ -41,7 +41,7 @@ public class HashMapLightsRepository implements LightsRepository {
         if(!lights.containsKey(light.id())) {
             throw new LightNotFoundException(light.id());
         }
-        lights.put(light.id(), light);
+        lights.put(light.id(), copyOf(light));
     }
 
     private Light copyOf(Light light) {

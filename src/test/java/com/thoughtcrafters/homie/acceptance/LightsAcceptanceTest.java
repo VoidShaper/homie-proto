@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.thoughtcrafters.homie.HomieApplication;
-import com.thoughtcrafters.homie.HomieConfguration;
+import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LightsAcceptanceTest extends AcceptanceTest {
 
     @ClassRule
-    public static final DropwizardAppRule<HomieConfguration> app =
+    public static final DropwizardAppRule<HomieConfiguration> app =
             new DropwizardAppRule<>(HomieApplication.class, "homie.yml");
 
     private SwitchState switchState;
@@ -163,7 +163,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
 
     @Override
-    public DropwizardAppRule<HomieConfguration> app() {
+    public DropwizardAppRule<HomieConfiguration> app() {
         return app;
     }
 }

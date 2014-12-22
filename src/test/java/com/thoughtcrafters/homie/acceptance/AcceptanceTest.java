@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import com.thoughtcrafters.homie.HomieConfguration;
-import com.thoughtcrafters.homie.TestUtils;
+import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
@@ -34,7 +33,14 @@ public abstract class AcceptanceTest {
         return new RoomId(UUID.fromString(uuid));
     }
 
-    public abstract DropwizardAppRule<HomieConfguration> app();
+    protected Map<String, Object> aRoomResponseFor(RoomId id) {
+        ClientResponse response = Client.create()
+                .resource(format("http://localhost:%d/rooms/%s", app().getLocalPort(), id.uuid()))
+                .get(ClientResponse.class);
+        return response.getEntity(Map.class);
+    }
+
+    public abstract DropwizardAppRule<HomieConfiguration> app();
 
     public Map<String, Object> aLightResponseFor(ApplianceId id) {
         ClientResponse response = Client.create()

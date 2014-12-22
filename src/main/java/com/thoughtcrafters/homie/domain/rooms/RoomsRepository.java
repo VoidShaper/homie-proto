@@ -6,4 +6,6 @@ public interface RoomsRepository {
     Optional<Room> getBy(RoomId applianceId);
 
     Room createFrom(String name);
+
+    void save(Room room);
 }

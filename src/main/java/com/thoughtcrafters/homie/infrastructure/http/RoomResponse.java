@@ -1,7 +1,5 @@
 package com.thoughtcrafters.homie.infrastructure.http;
 
-import com.google.common.base.Converter;
-import com.google.common.collect.FluentIterable;
 import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Room;
 
