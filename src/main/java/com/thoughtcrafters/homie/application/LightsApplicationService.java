@@ -3,11 +3,10 @@ package com.thoughtcrafters.homie.application;
 import com.thoughtcrafters.homie.domain.LightNotFoundException;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
-import com.thoughtcrafters.homie.domain.lights.LightId;
+import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class LightsApplicationService {
     private final LightsRepository lightsRepository;
@@ -16,15 +15,50 @@ public class LightsApplicationService {
         this.lightsRepository = lightsRepository;
     }
 
-    public Light getLightBy(UUID lightId) {
-        Optional<Light> light = lightsRepository.getBy(new LightId(lightId));
+    public Light getTheLightWith(ApplianceId id) {
+        Optional<Light> light = lightsRepository.getBy(id);
         if(light.isPresent()) {
             return light.get();
         }
-        throw new LightNotFoundException(lightId);
+        throw new LightNotFoundException(id);
     }
 
-    public Light createLight(String name, SwitchState initialState) {
+    public Light createLightFrom(String name, SwitchState initialState) {
         return lightsRepository.createFrom(name, initialState);
+    }
+
+    public void turnOnTheLightWith(ApplianceId id) {
+        perform(Light::turnOn).onLightWith(id);
+    }
+
+    public void turnOffTheLightWith(ApplianceId id) {
+        perform(Light::turnOff).onLightWith(id);
+    }
+
+    private LightActionExecutor perform(LightAction lightAction) {
+        return new LightActionExecutor(lightAction, lightsRepository);
+    }
+
+    private static class LightActionExecutor {
+        private final LightAction lightAction;
+        private LightsRepository lightsRepository;
+
+        private LightActionExecutor(LightAction lightAction, LightsRepository lightsRepository) {
+            this.lightAction = lightAction;
+            this.lightsRepository = lightsRepository;
+        }
+
+        public void onLightWith(ApplianceId applianceId) {
+            Optional<Light> light = lightsRepository.getBy(applianceId);
+            if(light.isPresent()) {
+                lightAction.on(light.get());
+                lightsRepository.save(light.get());
+            }
+            throw new LightNotFoundException(applianceId);
+        }
+    }
+
+    private interface LightAction {
+        public void on(Light light);
     }
 }

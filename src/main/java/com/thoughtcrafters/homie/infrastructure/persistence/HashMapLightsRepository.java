@@ -1,35 +1,50 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
+import com.thoughtcrafters.homie.domain.LightNotFoundException;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
-import com.thoughtcrafters.homie.domain.lights.LightId;
+import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
+import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class HashMapLightsRepository implements LightsRepository {
 
-    private Map<LightId, Light> lights = new HashMap<LightId, Light>();
+    private Map<ApplianceId, Light> lights = new HashMap<ApplianceId, Light>();
 
     @Override
-    public Optional<Light> getBy(LightId lightId) {
-        return lights.containsKey(lightId) ?
-                Optional.of(copyOf(lights.get(lightId)))
+    public Optional<Light> getBy(ApplianceId applianceId) {
+        return lights.containsKey(applianceId) ?
+                Optional.of(copyOf(lights.get(applianceId)))
                 : Optional.<Light>empty();
     }
 
     @Override
     public Light createFrom(String name, SwitchState initialState) {
-        LightId lightId = new LightId(UUID.randomUUID());
-        Light light = new Light(lightId, name, initialState);
-        lights.put(lightId, light);
+        checkNotNull(name);
+        checkNotNull(initialState);
+        ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
+        Light light = new Light(applianceId, name, Optional.<RoomId>empty(), initialState);
+        lights.put(applianceId, light);
         return copyOf(light);
     }
 
+    @Override
+    public void save(Light light) {
+        checkNotNull(light);
+        if(!lights.containsKey(light.id())) {
+            throw new LightNotFoundException(light.id());
+        }
+        lights.put(light.id(), light);
+    }
+
     private Light copyOf(Light light) {
-        return new Light(light.id(), light.name(), light.switchState());
+        return new Light(light.id(), light.name(), light.roomId(), light.switchState());
     }
 }

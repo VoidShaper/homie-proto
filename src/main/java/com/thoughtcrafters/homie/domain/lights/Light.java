@@ -2,28 +2,23 @@ package com.thoughtcrafters.homie.domain.lights;
 
 import com.thoughtcrafters.homie.domain.Appliance;
 import com.thoughtcrafters.homie.domain.ApplianceType;
+import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.behaviours.Switchable;
+import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
-public class Light implements Appliance, Switchable {
+import java.util.Optional;
 
-    private final LightId lightId;
-    private final String name;
+public class Light extends Appliance implements  Switchable {
+
     private SwitchState switchState;
 
-
-    public Light(LightId lightId, String name, SwitchState switchState) {
-        this.lightId = lightId;
-        this.name = name;
+    public Light(ApplianceId id,
+                 String name,
+                 Optional<RoomId> roomId,
+                 SwitchState switchState) {
+        super(id, name, roomId);
         this.switchState = switchState;
-    }
-
-    public LightId id() {
-        return lightId;
-    }
-
-    public String name() {
-        return name;
     }
 
     public SwitchState switchState() {
@@ -61,8 +56,8 @@ public class Light implements Appliance, Switchable {
 
         Light light = (Light) o;
 
-        if (!lightId.equals(light.lightId)) return false;
-        if (!name.equals(light.name)) return false;
+        if (!id().equals(light.id())) return false;
+        if (!name().equals(light.name())) return false;
         if (switchState != light.switchState) return false;
 
         return true;
@@ -70,8 +65,8 @@ public class Light implements Appliance, Switchable {
 
     @Override
     public int hashCode() {
-        int result = lightId.hashCode();
-        result = 31 * result + name.hashCode();
+        int result = id().hashCode();
+        result = 31 * result + name().hashCode();
         result = 31 * result + switchState.hashCode();
         return result;
     }
@@ -79,8 +74,8 @@ public class Light implements Appliance, Switchable {
     @Override
     public String toString() {
         return "Light{" +
-                "id=" + lightId +
-                ", name='" + name + '\'' +
+                "id=" + id() +
+                ", name='" + name() + '\'' +
                 ", switchState=" + switchState +
                 '}';
     }
