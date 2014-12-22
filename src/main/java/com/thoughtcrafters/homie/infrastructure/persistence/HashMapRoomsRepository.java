@@ -1,0 +1,39 @@
+package com.thoughtcrafters.homie.infrastructure.persistence;
+
+import com.thoughtcrafters.homie.domain.rooms.Room;
+import com.thoughtcrafters.homie.domain.rooms.RoomId;
+import com.thoughtcrafters.homie.domain.rooms.RoomsRepository;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.emptySet;
+
+public class HashMapRoomsRepository implements RoomsRepository {
+
+    private Map<RoomId, Room> rooms = new HashMap<>();
+
+    @Override
+    public Optional<Room> getBy(RoomId applianceId) {
+        return rooms.containsKey(applianceId) ?
+                Optional.of(copyOf(rooms.get(applianceId)))
+                : Optional.<Room>empty();
+    }
+
+    @Override
+    public Room createFrom(String name) {
+        checkNotNull(name);
+
+        RoomId roomId = new RoomId(UUID.randomUUID());
+        Room room = new Room(roomId, name, emptySet());
+        rooms.put(roomId, room);
+        return copyOf(room);
+    }
+
+    private Room copyOf(Room room) {
+        return new Room(room.id(), room.name(), room.appliances());
+    }
+}

@@ -11,16 +11,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Room {
     private final RoomId id;
+    private final String name;
     private ImmutableSet<ApplianceId> appliances;
 
-    public Room(RoomId id, Set<ApplianceId> appliances) {
+    public Room(RoomId id, String name, Set<ApplianceId> appliances) {
         this.id = id;
+        this.name = name;
         this.appliances = ImmutableSet.copyOf(appliances);
     }
 
     public RoomId id() {
         return id;
     }
+
+    public String name() {
+        return name;
+    }
+
 
     public Set<ApplianceId> appliances() {
         return appliances;

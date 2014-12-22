@@ -6,12 +6,9 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.thoughtcrafters.homie.HomieApplication;
 import com.thoughtcrafters.homie.HomieConfguration;
-import com.thoughtcrafters.homie.TestUtils;
 import com.thoughtcrafters.homie.domain.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
-import com.thoughtcrafters.homie.domain.lights.Light;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -21,19 +18,18 @@ import org.junit.runners.Parameterized;
 import javax.ws.rs.core.MediaType;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.thoughtcrafters.homie.TestUtils.UUID_REGEX;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
-public class LightsAcceptanceTest {
+public class LightsAcceptanceTest extends AcceptanceTest {
 
     @ClassRule
     public static final DropwizardAppRule<HomieConfguration> app =
             new DropwizardAppRule<>(HomieApplication.class, "homie.yml");
+
     private SwitchState switchState;
 
     @Parameterized.Parameters
@@ -55,7 +51,6 @@ public class LightsAcceptanceTest {
                 "name", "testName",
                 "initialState", switchState.name()));
 
-
         // when
         ClientResponse response = Client.create()
                 .resource(format("http://localhost:%d/lights", app.getLocalPort()))
@@ -71,7 +66,7 @@ public class LightsAcceptanceTest {
     }
 
     @Test
-    public void getsACreatedALightCorrectly() throws JsonProcessingException {
+    public void getsACreatedLightCorrectly() throws JsonProcessingException {
         // given
         ApplianceId id = aLightHasBeenCreatedWith("aName", switchState);
 
@@ -88,6 +83,23 @@ public class LightsAcceptanceTest {
                         "switchState", switchState.name(),
                         "name", "aName"
                 ));
+    }
+
+    @Test
+    public void returns404WhenLightIsNotFound() {
+        // given
+        ApplianceId id = new ApplianceId(UUID.randomUUID());
+
+        // when
+        ClientResponse response = Client.create()
+                .resource(format("http://localhost:%d/lights/%s", app.getLocalPort(), id.uuid()))
+                .get(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
+
+        assertThat(response.getEntity(String.class))
+                .isEqualToIgnoringCase(format("Light with id %s has not been found.", id.uuid()));
     }
 
     @Test
@@ -132,34 +144,26 @@ public class LightsAcceptanceTest {
                 ));
     }
 
-    private Map<String, Object> aLightResponseFor(ApplianceId id) {
-        ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s", app.getLocalPort(), id.uuid()))
-                .get(ClientResponse.class);
-        return response.getEntity(Map.class);
-    }
+    @Test
+    public void returns404WhenLightIsNotFoundWhenTryingToChangeTheSwitch() {
+        // given
+        ApplianceId id = new ApplianceId(UUID.randomUUID());
 
-    private ApplianceId aLightHasBeenCreatedWith(String aName, SwitchState initialState) throws JsonProcessingException {
-        String requestEntity = jsonFrom(ImmutableMap.of(
-                "name", aName,
-                "initialState", initialState.name()));
-
+        // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights", app.getLocalPort()))
-                .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
+                .resource(format("http://localhost:%d/lights/%s/%s",
+                        app.getLocalPort(), id.uuid(), switchState.name().toLowerCase()))
                 .post(ClientResponse.class);
 
-        String location = response.getHeaders().getFirst("Location");
-        Pattern p = Pattern.compile(UUID_REGEX);
-        Matcher m = p.matcher(location);
-        m.find();
-        return new ApplianceId(UUID.fromString(m.group(0)));
-    }
-
-    private String jsonFrom(ImmutableMap<String, String> request) throws JsonProcessingException {
-        return app.getEnvironment().getObjectMapper()
-                .writeValueAsString(request);
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
+        assertThat(response.getEntity(String.class))
+                .isEqualToIgnoringCase(format("Light with id %s has not been found.", id.uuid()));
     }
 
 
+    @Override
+    public DropwizardAppRule<HomieConfguration> app() {
+        return app;
+    }
 }

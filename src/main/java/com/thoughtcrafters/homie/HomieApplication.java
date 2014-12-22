@@ -1,9 +1,12 @@
 package com.thoughtcrafters.homie;
 
 import com.thoughtcrafters.homie.application.LightsApplicationService;
+import com.thoughtcrafters.homie.application.RoomsApplicationService;
 import com.thoughtcrafters.homie.infrastructure.http.LightsResource;
+import com.thoughtcrafters.homie.infrastructure.http.RoomsResource;
 import com.thoughtcrafters.homie.infrastructure.http.mappers.LightNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapLightsRepository;
+import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -23,6 +26,7 @@ public class HomieApplication extends Application<HomieConfguration> {
     public void run(HomieConfguration configuration, Environment environment) throws Exception {
         environment.jersey().register(new LightNotFoundExceptionMapper());
         environment.jersey().register(new LightsResource(new LightsApplicationService(new HashMapLightsRepository())));
+        environment.jersey().register(new RoomsResource(new RoomsApplicationService(new HashMapRoomsRepository())));
     }
 
     public static void main(String[] args) throws Exception {
