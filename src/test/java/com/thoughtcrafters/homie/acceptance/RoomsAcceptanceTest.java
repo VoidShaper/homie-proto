@@ -37,16 +37,16 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/rooms", app().getLocalPort()))
-                .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class);
+                                        .resource(format("http://localhost:%d/rooms", app().getLocalPort()))
+                                        .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
+                                        .post(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED_201);
 
         assertThat(response.getHeaders().getFirst("Location"))
                 .matches(format("http://localhost:%d/rooms/%s",
-                        app().getLocalPort(), UUID_REGEX));
+                                app().getLocalPort(), UUID_REGEX));
     }
 
     @Test
@@ -56,8 +56,8 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/rooms/%s", app.getLocalPort(), id.uuid()))
-                .get(ClientResponse.class);
+                                        .resource(format("http://localhost:%d/rooms/%s", app.getLocalPort(), id.uuid()))
+                                        .get(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
@@ -77,9 +77,9 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/rooms/%s/add/%s",
-                        app.getLocalPort(), id.uuid(), lightId.uuid()))
-                .post(ClientResponse.class);
+                                        .resource(format("http://localhost:%d/rooms/%s/add/%s",
+                                                         app.getLocalPort(), id.uuid(), lightId.uuid()))
+                                        .post(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
@@ -95,6 +95,36 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                         "name", "lightName",
                         "switchState", "ON",
                         "roomId", id.uuid().toString()
+                ));
+    }
+
+    @Test
+    public void removesAnApplianceFromTheRoom() throws JsonProcessingException {
+        // given
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", SwitchState.ON);
+        RoomId id = aRoomHasBeenCreatedWith("aRoomName");
+        anApplianceHasBeenAddedToTheRoom(id, lightId);
+
+        // when
+        ClientResponse response =
+                Client.create()
+                      .resource(format("http://localhost:%d/rooms/%s/remove/%s",
+                                       app.getLocalPort(), id.uuid(), lightId.uuid()))
+                      .post(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
+
+        assertThat(aRoomResponseFor(id))
+                .isEqualTo(ImmutableMap.of(
+                        "name", "aRoomName",
+                        "appliances", newArrayList()
+                ));
+
+        assertThat(aLightResponseFor(lightId))
+                .isEqualTo(ImmutableMap.of(
+                        "name", "lightName",
+                        "switchState", "ON"
                 ));
     }
 

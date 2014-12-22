@@ -2,7 +2,6 @@ package com.thoughtcrafters.homie.infrastructure.http;
 
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
-import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.UUID;
 

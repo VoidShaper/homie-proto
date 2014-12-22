@@ -40,6 +40,13 @@ public abstract class AcceptanceTest {
         return response.getEntity(Map.class);
     }
 
+    protected void anApplianceHasBeenAddedToTheRoom(RoomId id, ApplianceId applianceId) {
+        Client.create()
+              .resource(String.format("http://localhost:%d/rooms/%s/add/%s",
+                                      RoomsAcceptanceTest.app.getLocalPort(), id.uuid(), applianceId.uuid()))
+              .post(ClientResponse.class);
+    }
+
     public abstract DropwizardAppRule<HomieConfiguration> app();
 
     public Map<String, Object> aLightResponseFor(ApplianceId id) {

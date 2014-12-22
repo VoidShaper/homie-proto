@@ -41,6 +41,15 @@ public class RoomsApplicationService {
             roomsRepository.save(room.get());
             lightsRepository.save(light.get());
         }
+    }
 
+    public void removeApplianceFromRoom(ApplianceId applianceId, RoomId roomId) {
+        Optional<Room> room = roomsRepository.getBy(roomId);
+        Optional<Light> light = lightsRepository.getBy(applianceId);
+        if(room.isPresent() && light.isPresent()) {
+            room.get().removeAppliance(light.get());
+            roomsRepository.save(room.get());
+            lightsRepository.save(light.get());
+        }
     }
 }

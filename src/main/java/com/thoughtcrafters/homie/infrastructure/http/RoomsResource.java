@@ -45,4 +45,13 @@ public class RoomsResource {
                                                    new RoomId(roomId.get()));
         return Response.noContent().build();
     }
+
+    @POST
+    @Path("/{roomId}/remove/{applianceId}")
+    public Response removeApplianceToRoom(@PathParam("roomId") UUIDParam roomId,
+                                          @PathParam("applianceId") UUIDParam applianceId) {
+        roomsApplicationService.removeApplianceFromRoom(new ApplianceId(applianceId.get()),
+                                                        new RoomId(roomId.get()));
+        return Response.noContent().build();
+    }
 }
