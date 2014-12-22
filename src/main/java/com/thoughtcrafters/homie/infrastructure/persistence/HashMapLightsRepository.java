@@ -1,9 +1,10 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
-import com.thoughtcrafters.homie.domain.LightNotFoundException;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
@@ -16,7 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class HashMapLightsRepository implements LightsRepository {
 
-    private Map<ApplianceId, Light> lights = new HashMap<ApplianceId, Light>();
+    private Map<ApplianceId, Light> lights = new HashMap<>();
 
     @Override
     public Optional<Light> getBy(ApplianceId applianceId) {
@@ -39,7 +40,7 @@ public class HashMapLightsRepository implements LightsRepository {
     public void save(Light light) {
         checkNotNull(light);
         if(!lights.containsKey(light.id())) {
-            throw new LightNotFoundException(light.id());
+            throw new ApplianceNotFoundException(light.id(), ApplianceType.LIGHT);
         }
         lights.put(light.id(), copyOf(light));
     }

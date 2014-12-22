@@ -1,6 +1,6 @@
 package com.thoughtcrafters.homie.application;
 
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.Light;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
 import com.thoughtcrafters.homie.domain.rooms.Room;

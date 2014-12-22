@@ -1,6 +1,6 @@
 package com.thoughtcrafters.homie.infrastructure.http;
 
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Room;
 
 import java.util.List;

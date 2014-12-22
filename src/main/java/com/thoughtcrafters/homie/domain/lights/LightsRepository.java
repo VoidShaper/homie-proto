@@ -1,6 +1,6 @@
 package com.thoughtcrafters.homie.domain.lights;
 
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.thoughtcrafters.homie.domain;
+package com.thoughtcrafters.homie.domain.appliances;
 
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 

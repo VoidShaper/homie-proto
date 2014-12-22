@@ -1,8 +1,8 @@
 package com.thoughtcrafters.homie.domain.lights;
 
-import com.thoughtcrafters.homie.domain.Appliance;
-import com.thoughtcrafters.homie.domain.ApplianceType;
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.Appliance;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.behaviours.Switchable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;

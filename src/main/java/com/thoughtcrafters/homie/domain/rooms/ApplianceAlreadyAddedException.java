@@ -1,7 +1,7 @@
 package com.thoughtcrafters.homie.domain.rooms;
 
 import com.thoughtcrafters.homie.domain.DomainException;
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 
 import static java.lang.String.format;
 

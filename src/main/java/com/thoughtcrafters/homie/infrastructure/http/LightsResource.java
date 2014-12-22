@@ -1,7 +1,7 @@
 package com.thoughtcrafters.homie.infrastructure.http;
 
 import com.thoughtcrafters.homie.application.LightsApplicationService;
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.Light;
 import io.dropwizard.jersey.params.UUIDParam;
 

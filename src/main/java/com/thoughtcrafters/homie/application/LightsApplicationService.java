@@ -1,9 +1,10 @@
 package com.thoughtcrafters.homie.application;
 
-import com.thoughtcrafters.homie.domain.LightNotFoundException;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
 
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class LightsApplicationService {
         if(light.isPresent()) {
             return light.get();
         }
-        throw new LightNotFoundException(id);
+        throw new ApplianceNotFoundException(id, ApplianceType.LIGHT);
     }
 
     public Light createLightFrom(String name, SwitchState initialState) {
@@ -55,7 +56,8 @@ public class LightsApplicationService {
                 lightsRepository.save(light.get());
                 return;
             }
-            throw new LightNotFoundException(applianceId);
+
+            throw new ApplianceNotFoundException(applianceId, ApplianceType.LIGHT);
         }
     }
 

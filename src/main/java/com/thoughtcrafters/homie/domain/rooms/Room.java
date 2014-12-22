@@ -2,8 +2,8 @@ package com.thoughtcrafters.homie.domain.rooms;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.thoughtcrafters.homie.domain.Appliance;
-import com.thoughtcrafters.homie.domain.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.Appliance;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 
 import java.util.Set;
 
