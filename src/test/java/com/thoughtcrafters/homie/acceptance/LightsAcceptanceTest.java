@@ -10,12 +10,14 @@ import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 
 import java.util.*;
 
@@ -32,12 +34,21 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
     private SwitchState switchState;
 
+    private static final String RESOURCE_PATH = "lights";
+    private UriBuilder resourceUri;
+
     @Parameterized.Parameters
     public static Collection switchStates() {
         return Arrays.asList(new Object[][]{
                 {SwitchState.ON},
                 {SwitchState.OFF}
         });
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        resourceUri = UriBuilder.fromPath(format("http://localhost:%d", app.getLocalPort()))
+                                .path(RESOURCE_PATH);
     }
 
     public LightsAcceptanceTest(SwitchState switchState) {
@@ -53,16 +64,15 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights", app.getLocalPort()))
-                .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class);
+                                        .resource(resourceUri.build())
+                                        .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
+                                        .post(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED_201);
 
         assertThat(response.getHeaders().getFirst("Location"))
-                .matches(format("http://localhost:%d/lights/%s",
-                        app.getLocalPort(), UUID_REGEX));
+                .matches(format("%s/%s", resourceUri.build(), UUID_REGEX));
     }
 
     @Test
@@ -72,8 +82,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s", app.getLocalPort(), id.uuid()))
-                .get(ClientResponse.class);
+                                        .resource(resourceUri.path(id.uuid().toString()).build())
+                                        .get(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
@@ -92,8 +102,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s", app.getLocalPort(), id.uuid()))
-                .get(ClientResponse.class);
+                                        .resource(resourceUri.path(id.uuid().toString()).build())
+                                        .get(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
@@ -109,9 +119,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s/on",
-                        app.getLocalPort(), id.uuid()))
-                .post(ClientResponse.class);
+                                        .resource(resourceUri.path(id.uuid().toString()).path("on").build())
+                                        .post(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
@@ -130,9 +139,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s/off",
-                        app.getLocalPort(), id.uuid()))
-                .post(ClientResponse.class);
+                                        .resource(resourceUri.path(id.uuid().toString()).path("off").build())
+                                        .post(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
@@ -150,10 +158,11 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         ApplianceId id = new ApplianceId(UUID.randomUUID());
 
         // when
-        ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s/%s",
-                        app.getLocalPort(), id.uuid(), switchState.name().toLowerCase()))
-                .post(ClientResponse.class);
+        ClientResponse response =
+                Client.create()
+                      .resource(resourceUri.path(id.uuid().toString())
+                                           .path(switchState.name().toLowerCase()).build())
+                      .post(ClientResponse.class);
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
