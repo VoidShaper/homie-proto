@@ -94,6 +94,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                 .isEqualTo(ImmutableMap.of(
                         "name", "lightName",
                         "switchState", "ON",
+                        "type", "LIGHT",
                         "roomId", id.uuid().toString()
                 ));
     }
@@ -124,7 +125,8 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat(aLightResponseFor(lightId))
                 .isEqualTo(ImmutableMap.of(
                         "name", "lightName",
-                        "switchState", "ON"
+                        "switchState", "ON",
+                        "type", "LIGHT"
                 ));
     }
 

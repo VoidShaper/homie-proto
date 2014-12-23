@@ -11,41 +11,41 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-@Path("/lights")
+@Path("/appliances")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LightsResource {
+public class AppliancesResource {
 
     private LightsApplicationService lightsApplicationService;
 
-    public LightsResource(LightsApplicationService lightsApplicationService1) {
-        this.lightsApplicationService = lightsApplicationService1;
+    public AppliancesResource(LightsApplicationService lightsApplicationService) {
+        this.lightsApplicationService = lightsApplicationService;
     }
 
     @GET
-    @Path("/{lightId}")
-    public LightResponse getLight(@PathParam("lightId") UUIDParam lightId) {
-        return LightResponse.from(lightsApplicationService.getTheLightWith(new ApplianceId(lightId.get())));
+    @Path("/{applianceId}")
+    public ApplianceResponse getAppliance(@PathParam("applianceId") UUIDParam applianceId) {
+        return ApplianceResponse.from(lightsApplicationService.getTheLightWith(new ApplianceId(applianceId.get())));
     }
 
     @POST
-    public Response createLight(@Valid NewLightRequest request) {
+    public Response createLight(@Valid NewApplianceRequest request) {
         Light light = lightsApplicationService.createLightFrom(request.getName(), request.getInitialState());
         return Response.created(UriBuilder.fromPath(light.id().uuid().toString()).build())
                 .build();
     }
 
     @POST
-    @Path("/{lightId}/on")
-    public Response turnOnTheLight(@PathParam("lightId") UUIDParam lightId) {
-        lightsApplicationService.turnOnTheLightWith(new ApplianceId(lightId.get()));
+    @Path("/{applianceId}/on")
+    public Response turnOnTheLight(@PathParam("applianceId") UUIDParam applianceId) {
+        lightsApplicationService.turnOnTheLightWith(new ApplianceId(applianceId.get()));
         return Response.noContent().build();
     }
 
     @POST
-    @Path("/{lightId}/off")
-    public Response turnOffTheLight(@PathParam("lightId") UUIDParam lightId) {
-        lightsApplicationService.turnOffTheLightWith(new ApplianceId(lightId.get()));
+    @Path("/{applianceId}/off")
+    public Response turnOffTheLight(@PathParam("applianceId") UUIDParam applianceId) {
+        lightsApplicationService.turnOffTheLightWith(new ApplianceId(applianceId.get()));
         return Response.noContent().build();
     }
 }

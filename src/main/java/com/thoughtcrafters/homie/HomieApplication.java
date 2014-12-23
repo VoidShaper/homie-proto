@@ -3,7 +3,7 @@ package com.thoughtcrafters.homie;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.thoughtcrafters.homie.application.LightsApplicationService;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
-import com.thoughtcrafters.homie.infrastructure.http.LightsResource;
+import com.thoughtcrafters.homie.infrastructure.http.AppliancesResource;
 import com.thoughtcrafters.homie.infrastructure.http.RoomsResource;
 import com.thoughtcrafters.homie.infrastructure.http.mappers.LightNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapLightsRepository;
@@ -29,7 +29,7 @@ public class HomieApplication extends Application<HomieConfiguration> {
 
         environment.jersey().register(new LightNotFoundExceptionMapper());
         HashMapLightsRepository lightsRepository = new HashMapLightsRepository();
-        environment.jersey().register(new LightsResource(new LightsApplicationService(lightsRepository)));
+        environment.jersey().register(new AppliancesResource(new LightsApplicationService(lightsRepository)));
         environment.jersey().register(new RoomsResource(new RoomsApplicationService(new HashMapRoomsRepository(), lightsRepository)));
     }
 

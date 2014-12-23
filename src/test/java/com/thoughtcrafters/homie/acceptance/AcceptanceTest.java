@@ -11,6 +11,7 @@ import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -21,13 +22,26 @@ import static java.lang.String.format;
 
 public abstract class AcceptanceTest {
 
+    protected static final String APPLIANCES_PATH = "appliances";
+    protected static final String ROOMS_PATH = "rooms";
+
+    protected UriBuilder appliancesUri() {
+        return UriBuilder.fromPath(format("http://localhost:%d", app().getLocalPort()))
+                         .path(APPLIANCES_PATH);
+    }
+
+    protected UriBuilder roomsUri() {
+        return UriBuilder.fromPath(format("http://localhost:%d", app().getLocalPort()))
+                         .path(ROOMS_PATH);
+    }
+
     protected RoomId aRoomHasBeenCreatedWith(String aRoomName) throws JsonProcessingException {
         String requestEntity = jsonFrom(ImmutableMap.of("name", aRoomName));
 
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/rooms", app().getLocalPort()))
-                .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class);
+                                        .resource(roomsUri().build())
+                                        .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
+                                        .post(ClientResponse.class);
 
         String uuid = uuidFrom(response);
         return new RoomId(UUID.fromString(uuid));
@@ -35,15 +49,17 @@ public abstract class AcceptanceTest {
 
     protected Map<String, Object> aRoomResponseFor(RoomId id) {
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/rooms/%s", app().getLocalPort(), id.uuid()))
-                .get(ClientResponse.class);
+                                        .resource(roomsUri().path(id.uuid().toString()).build())
+                                        .get(ClientResponse.class);
         return response.getEntity(Map.class);
     }
 
     protected void anApplianceHasBeenAddedToTheRoom(RoomId id, ApplianceId applianceId) {
         Client.create()
-              .resource(String.format("http://localhost:%d/rooms/%s/add/%s",
-                                      RoomsAcceptanceTest.app.getLocalPort(), id.uuid(), applianceId.uuid()))
+              .resource(roomsUri().path(id.uuid().toString())
+                                  .path("add")
+                                  .path(applianceId.uuid().toString())
+                                  .build())
               .post(ClientResponse.class);
     }
 
@@ -51,8 +67,8 @@ public abstract class AcceptanceTest {
 
     public Map<String, Object> aLightResponseFor(ApplianceId id) {
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights/%s", app().getLocalPort(), id.uuid()))
-                .get(ClientResponse.class);
+                                        .resource(appliancesUri().path(id.uuid().toString()).build())
+                                        .get(ClientResponse.class);
         return response.getEntity(Map.class);
     }
 
@@ -60,12 +76,13 @@ public abstract class AcceptanceTest {
             throws JsonProcessingException {
         String requestEntity = jsonFrom(ImmutableMap.of(
                 "name", aName,
-                "initialState", initialState.name()));
+                "initialState", initialState.name(),
+                "type", "LIGHT"));
 
         ClientResponse response = Client.create()
-                .resource(format("http://localhost:%d/lights", app().getLocalPort()))
-                .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
-                .post(ClientResponse.class);
+                                        .resource(appliancesUri().build())
+                                        .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
+                                        .post(ClientResponse.class);
 
         String uuid = uuidFrom(response);
         return new ApplianceId(UUID.fromString(uuid));
@@ -81,7 +98,7 @@ public abstract class AcceptanceTest {
 
     public String jsonFrom(ImmutableMap<String, String> request) throws JsonProcessingException {
         return app().getEnvironment().getObjectMapper()
-                .writeValueAsString(request);
+                    .writeValueAsString(request);
     }
 
 }

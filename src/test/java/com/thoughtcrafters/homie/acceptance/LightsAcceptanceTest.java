@@ -10,14 +10,12 @@ import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
 
 import java.util.*;
 
@@ -34,8 +32,6 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
     private SwitchState switchState;
 
-    private static final String RESOURCE_PATH = "lights";
-    private UriBuilder resourceUri;
 
     @Parameterized.Parameters
     public static Collection switchStates() {
@@ -45,11 +41,6 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         });
     }
 
-    @Before
-    public void setUp() throws Exception {
-        resourceUri = UriBuilder.fromPath(format("http://localhost:%d", app.getLocalPort()))
-                                .path(RESOURCE_PATH);
-    }
 
     public LightsAcceptanceTest(SwitchState switchState) {
         this.switchState = switchState;
@@ -60,11 +51,12 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // given
         String requestEntity = jsonFrom(ImmutableMap.of(
                 "name", "testName",
-                "initialState", switchState.name()));
+                "initialState", switchState.name(),
+                "type", "LIGHT"));
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(resourceUri.build())
+                                        .resource(appliancesUri().build())
                                         .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
                                         .post(ClientResponse.class);
 
@@ -72,7 +64,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED_201);
 
         assertThat(response.getHeaders().getFirst("Location"))
-                .matches(format("%s/%s", resourceUri.build(), UUID_REGEX));
+                .matches(format("%s/%s", appliancesUri().build(), UUID_REGEX));
     }
 
     @Test
@@ -82,7 +74,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(resourceUri.path(id.uuid().toString()).build())
+                                        .resource(appliancesUri().path(id.uuid().toString()).build())
                                         .get(ClientResponse.class);
 
         // then
@@ -91,7 +83,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getEntity(Map.class))
                 .isEqualTo(ImmutableMap.of(
                         "switchState", switchState.name(),
-                        "name", "aName"
+                        "name", "aName",
+                        "type", "LIGHT"
                 ));
     }
 
@@ -102,7 +95,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(resourceUri.path(id.uuid().toString()).build())
+                                        .resource(appliancesUri().path(id.uuid().toString()).build())
                                         .get(ClientResponse.class);
 
         // then
@@ -119,7 +112,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(resourceUri.path(id.uuid().toString()).path("on").build())
+                                        .resource(appliancesUri().path(id.uuid().toString()).path("on").build())
                                         .post(ClientResponse.class);
 
         // then
@@ -128,7 +121,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(aLightResponseFor(id))
                 .isEqualTo(ImmutableMap.of(
                         "switchState", SwitchState.ON.name(),
-                        "name", "aName"
+                        "name", "aName",
+                        "type", "LIGHT"
                 ));
     }
 
@@ -139,7 +133,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(resourceUri.path(id.uuid().toString()).path("off").build())
+                                        .resource(appliancesUri().path(id.uuid().toString()).path("off").build())
                                         .post(ClientResponse.class);
 
         // then
@@ -148,7 +142,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(aLightResponseFor(id))
                 .isEqualTo(ImmutableMap.of(
                         "switchState", SwitchState.OFF.name(),
-                        "name", "aName"
+                        "name", "aName",
+                        "type", "LIGHT"
                 ));
     }
 
@@ -160,7 +155,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // when
         ClientResponse response =
                 Client.create()
-                      .resource(resourceUri.path(id.uuid().toString())
+                      .resource(appliancesUri().path(id.uuid().toString())
                                            .path(switchState.name().toLowerCase()).build())
                       .post(ClientResponse.class);
 
