@@ -1,5 +1,6 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
+import com.google.common.collect.FluentIterable;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
@@ -8,10 +9,7 @@ import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,6 +41,17 @@ public class HashMapLightsRepository implements LightsRepository {
             throw new ApplianceNotFoundException(light.id(), ApplianceType.LIGHT);
         }
         lights.put(light.id(), copyOf(light));
+    }
+
+    @Override
+    public List<Light> getAll() {
+        return FluentIterable.from(lights.values())
+                .transform(this::copyOf)
+                .toList();
+    }
+
+    public void clearAll() {
+        lights.clear();
     }
 
     private Light copyOf(Light light) {

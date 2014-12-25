@@ -46,4 +46,8 @@ public class HashMapRoomsRepository implements RoomsRepository {
     private Room copyOf(Room room) {
         return new Room(room.id(), room.name(), room.appliances());
     }
+
+    public void clearAll() {
+        rooms.clear();
+    }
 }

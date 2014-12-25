@@ -10,6 +10,7 @@ import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +33,6 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
     private SwitchState switchState;
 
-
     @Parameterized.Parameters
     public static Collection switchStates() {
         return Arrays.asList(new Object[][]{
@@ -41,6 +41,10 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         });
     }
 
+    @After
+    public void tearDown() throws Exception {
+        app.<HomieApplication>getApplication().clearAllData();
+    }
 
     public LightsAcceptanceTest(SwitchState switchState) {
         this.switchState = switchState;
@@ -156,7 +160,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         ClientResponse response =
                 Client.create()
                       .resource(appliancesUri().path(id.uuid().toString())
-                                           .path(switchState.name().toLowerCase()).build())
+                                               .path(switchState.name().toLowerCase()).build())
                       .post(ClientResponse.class);
 
         // then
@@ -165,6 +169,44 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                 .isEqualToIgnoringCase(format("Light with id %s has not been found.", id.uuid()));
     }
 
+    @Test
+    public void getsAnEmptyListOfAppliancesIfNoneWereAddedWhenGettingAll()
+            throws JsonProcessingException {
+
+        // when
+        ClientResponse response = Client.create()
+                                        .resource(appliancesUri().build())
+                                        .get(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(response.getEntity(List.class)).isEmpty();
+    }
+
+    @Test
+    public void getsBothAddedAppliancesWhenGettingAll() throws JsonProcessingException {
+        // given
+        ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLightOff", SwitchState.OFF);
+        ApplianceId lIghtOnId = aLightHasBeenCreatedWith("secondLightOn", SwitchState.ON);
+
+        // when
+        ClientResponse response = Client.create()
+                                        .resource(appliancesUri().build())
+                                        .get(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat((List<Map<String, String>>) response.getEntity(List.class))
+                .containsOnly(
+                        ImmutableMap.of("name", "firstLightOff",
+                                        "switchState", SwitchState.OFF.name(),
+                                        "id", lightOffId.uuid().toString(),
+                                        "type", "LIGHT"),
+                        ImmutableMap.of("name", "secondLightOn",
+                                        "switchState", SwitchState.ON.name(),
+                                        "id", lIghtOnId.uuid().toString(),
+                                        "type", "LIGHT"));
+    }
 
     @Override
     public DropwizardAppRule<HomieConfiguration> app() {

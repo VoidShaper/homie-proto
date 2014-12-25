@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 public class HomieApplication extends Application<HomieConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(HomieApplication.class);
+    private HashMapRoomsRepository roomsRepository;
+    private HashMapLightsRepository lightsRepository;
 
     @Override
     public void initialize(Bootstrap<HomieConfiguration> bootstrap) {
@@ -28,12 +30,18 @@ public class HomieApplication extends Application<HomieConfiguration> {
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         environment.jersey().register(new LightNotFoundExceptionMapper());
-        HashMapLightsRepository lightsRepository = new HashMapLightsRepository();
+        lightsRepository = new HashMapLightsRepository();
         environment.jersey().register(new AppliancesResource(new LightsApplicationService(lightsRepository)));
-        environment.jersey().register(new RoomsResource(new RoomsApplicationService(new HashMapRoomsRepository(), lightsRepository)));
+        roomsRepository = new HashMapRoomsRepository();
+        environment.jersey().register(new RoomsResource(new RoomsApplicationService(roomsRepository, lightsRepository)));
     }
 
     public static void main(String[] args) throws Exception {
         new HomieApplication().run(args);
+    }
+
+    public void clearAllData() {
+        roomsRepository.clearAll();
+        lightsRepository.clearAll();
     }
 }

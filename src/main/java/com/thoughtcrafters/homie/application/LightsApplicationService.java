@@ -1,12 +1,16 @@
 package com.thoughtcrafters.homie.application;
 
+import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
+import com.thoughtcrafters.homie.infrastructure.http.ApplianceResponse;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class LightsApplicationService {
@@ -38,6 +42,10 @@ public class LightsApplicationService {
 
     private LightActionExecutor perform(LightAction lightAction) {
         return new LightActionExecutor(lightAction, lightsRepository);
+    }
+
+    public List<Light> getAllAppliances() {
+        return lightsRepository.getAll();
     }
 
     private static class LightActionExecutor {
