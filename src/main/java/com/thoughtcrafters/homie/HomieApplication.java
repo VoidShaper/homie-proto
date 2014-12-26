@@ -9,6 +9,7 @@ import com.thoughtcrafters.homie.infrastructure.http.mappers.LightNotFoundExcept
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapLightsRepository;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.slf4j.Logger;
@@ -22,7 +23,11 @@ public class HomieApplication extends Application<HomieConfiguration> {
 
     @Override
     public void initialize(Bootstrap<HomieConfiguration> bootstrap) {
-
+        bootstrap.addBundle(new AssetsBundle("/assets/css", "/css", null, "css"));
+        bootstrap.addBundle(new AssetsBundle("/assets/js", "/js", null, "js"));
+        bootstrap.addBundle(new AssetsBundle("/assets/fonts", "/fonts", null, "fonts"));
+        bootstrap.addBundle(new AssetsBundle("/assets/webapp", "/webapp", null, "webapp"));
+        bootstrap.addBundle(new AssetsBundle("/assets/webapp/index.html", "/ui", null, "ui"));
     }
 
     @Override
@@ -33,7 +38,8 @@ public class HomieApplication extends Application<HomieConfiguration> {
         lightsRepository = new HashMapLightsRepository();
         environment.jersey().register(new AppliancesResource(new LightsApplicationService(lightsRepository)));
         roomsRepository = new HashMapRoomsRepository();
-        environment.jersey().register(new RoomsResource(new RoomsApplicationService(roomsRepository, lightsRepository)));
+        environment.jersey()
+                   .register(new RoomsResource(new RoomsApplicationService(roomsRepository, lightsRepository)));
     }
 
     public static void main(String[] args) throws Exception {
