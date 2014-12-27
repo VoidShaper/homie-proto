@@ -1,0 +1,32 @@
+<div ng-controller="AppliancesController">
+    <h3>Appliances</h3>
+    <ul class="list-group">
+        <li class="list-group-item" ng-repeat="appliance in appliances">{{appliance}}</li>
+    </ul>
+
+    <h3>New Appliance</h3>
+
+    <alert ng-repeat="alert in alerts"
+           type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}
+    </alert>
+    <form novalidate>
+        <div class="form-group">
+            <label for="applianceName">Name</label>
+            <input id="applianceName" type="text" ng-model="appliance.name" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <label for="applianceType">Type</label>
+            <select ng-init="appliance.type = appliance.type || applianceTypes[0]"
+                    ng-options="type for type in applianceTypes" id="applianceType"
+                    type="text" ng-model="appliance.type" class="form-control"></select>
+        </div>
+        <div class="form-group">
+            <label for="initialState">Initial State</label>
+            <select ng-init="appliance.initialState = appliance.initialState || initialStates[0]"
+                    ng-options="state for state in initialStates" id="initialState"
+                    type="text" ng-model="appliance.initialState" class="form-control"></select>
+        </div>
+        <button class="btn btn-primary" ng-click="newAppliance()">Create Appliance</button>
+    </form>
+
+</div>

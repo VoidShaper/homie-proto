@@ -26,8 +26,8 @@ public class HomieApplication extends Application<HomieConfiguration> {
         bootstrap.addBundle(new AssetsBundle("/assets/css", "/css", null, "css"));
         bootstrap.addBundle(new AssetsBundle("/assets/js", "/js", null, "js"));
         bootstrap.addBundle(new AssetsBundle("/assets/fonts", "/fonts", null, "fonts"));
-        bootstrap.addBundle(new AssetsBundle("/assets/webapp", "/webapp", null, "webapp"));
-        bootstrap.addBundle(new AssetsBundle("/assets/webapp/index.html", "/ui", null, "ui"));
+        bootstrap.addBundle(new AssetsBundle("/assets/html", "/html", null, "html"));
+        bootstrap.addBundle(new AssetsBundle("/assets/html/index.html", "/ui", null, "ui"));
     }
 
     @Override
