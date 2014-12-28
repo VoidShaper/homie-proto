@@ -1,2 +1,26 @@
+<div ng-controller="RoomsController">
+    <div class="panel panel-default">
+        <div class="panel-heading">Rooms</div>
+        <ul class="list-group">
+            <li class="list-group-item" ng-repeat="room in rooms">
+                {{room.id}} {{room.name}}
+            </li>
+        </ul>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">New Room</div>
 
-Rooms
+        <div class="panel-body">
+            <alert ng-repeat="alert in alerts"
+                   type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}
+            </alert>
+            <form novalidate>
+                <div class="form-group">
+                    <label for="roomName">Name</label>
+                    <input id="roomName" type="text" ng-model="room.name" class="form-control"/>
+                </div>
+                <button class="btn btn-primary" ng-click="newRoom()">Create Room</button>
+            </form>
+        </div>
+    </div>
+</div>
