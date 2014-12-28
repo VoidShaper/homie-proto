@@ -1,14 +1,12 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
+import com.google.common.collect.FluentIterable;
 import com.thoughtcrafters.homie.domain.rooms.Room;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import com.thoughtcrafters.homie.domain.rooms.RoomNotFoundException;
 import com.thoughtcrafters.homie.domain.rooms.RoomsRepository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptySet;
@@ -41,6 +39,13 @@ public class HashMapRoomsRepository implements RoomsRepository {
             throw new RoomNotFoundException(room.id());
         }
         rooms.put(room.id(), copyOf(room));
+    }
+
+    @Override
+    public List<Room> getAll() {
+        return FluentIterable.from(rooms.values())
+                             .transform(this::copyOf)
+                             .toList();
     }
 
     private Room copyOf(Room room) {

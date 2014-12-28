@@ -8,12 +8,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RoomResponse {
-    public String name;
-    public List<UUID> appliances;
+    private UUID id;
+    private String name;
+    private List<UUID> appliances;
 
-    private RoomResponse(String name, List<UUID> appliances) {
+    private RoomResponse(UUID id, String name, List<UUID> appliances) {
+        this.id = id;
         this.name = name;
         this.appliances = appliances;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {
@@ -24,8 +30,17 @@ public class RoomResponse {
         return appliances;
     }
     
-    public static RoomResponse from(Room room) {
-        return new RoomResponse(room.name(),
+    public static RoomResponse withoutIdFrom(Room room) {
+        return new RoomResponse(
+                null,
+                room.name(),
+                room.appliances().stream().map(ApplianceId::uuid).collect(Collectors.toList()));
+    }
+
+    public static RoomResponse withIdFrom(Room room) {
+        return new RoomResponse(
+                room.id().uuid(),
+                room.name(),
                 room.appliances().stream().map(ApplianceId::uuid).collect(Collectors.toList()));
     }
 }

@@ -8,6 +8,7 @@ import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import com.thoughtcrafters.homie.domain.rooms.RoomNotFoundException;
 import com.thoughtcrafters.homie.domain.rooms.RoomsRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public class RoomsApplicationService {
@@ -31,6 +32,10 @@ public class RoomsApplicationService {
 
     public Room createRoomWith(String name) {
         return roomsRepository.createFrom(name);
+    }
+
+    public List<Room> getAllRooms() {
+        return roomsRepository.getAll();
     }
 
     public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId) {

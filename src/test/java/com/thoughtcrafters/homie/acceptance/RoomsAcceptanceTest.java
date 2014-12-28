@@ -1,6 +1,7 @@
 package com.thoughtcrafters.homie.acceptance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -11,12 +12,14 @@ import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -30,6 +33,11 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     public static final DropwizardAppRule<HomieConfiguration> app =
             new DropwizardAppRule<>(HomieApplication.class, "homie.yml");
 
+    @After
+    public void tearDown() throws Exception {
+        app.<HomieApplication>getApplication().clearAllData();
+    }
+
     @Test
     public void createsARoomCorrectly() throws JsonProcessingException {
         // given
@@ -37,7 +45,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(format("http://localhost:%d/rooms", app().getLocalPort()))
+                                        .resource(roomsUri().build())
                                         .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
                                         .post(ClientResponse.class);
 
@@ -56,7 +64,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(format("http://localhost:%d/rooms/%s", app.getLocalPort(), id.uuid()))
+                                        .resource(roomsUri().path(id.uuid().toString()).build())
                                         .get(ClientResponse.class);
 
         // then
@@ -77,8 +85,10 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(format("http://localhost:%d/rooms/%s/add/%s",
-                                                         app.getLocalPort(), id.uuid(), lightId.uuid()))
+                                        .resource(roomsUri().path(id.uuid().toString())
+                                                            .path("add")
+                                                            .path(lightId.uuid().toString())
+                                                            .build())
                                         .post(ClientResponse.class);
 
         // then
@@ -109,8 +119,10 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         // when
         ClientResponse response =
                 Client.create()
-                      .resource(format("http://localhost:%d/rooms/%s/remove/%s",
-                                       app.getLocalPort(), id.uuid(), lightId.uuid()))
+                      .resource(roomsUri().path(id.uuid().toString())
+                                          .path("remove")
+                                          .path(lightId.uuid().toString())
+                                          .build())
                       .post(ClientResponse.class);
 
         // then
@@ -128,6 +140,29 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                         "switchState", "ON",
                         "type", "LIGHT"
                 ));
+    }
+
+    @Test
+    public void getsAllTheRooms() throws Exception {
+        // given
+        RoomId id1 = aRoomHasBeenCreatedWith("nameOne");
+        RoomId id2 = aRoomHasBeenCreatedWith("nameTwo");
+
+        // when
+        ClientResponse clientResponse = Client.create()
+                                              .resource(roomsUri().build())
+                                              .get(ClientResponse.class);
+
+        // then
+        assertThat(clientResponse.getStatus()).isEqualTo(HttpStatus.OK_200);
+        assertThat((List<Map<String, Object>>) clientResponse.getEntity(List.class))
+                .containsOnly(
+                        ImmutableMap.of("name", "nameOne",
+                                        "appliances", ImmutableList.of(),
+                                        "id", id1.uuid().toString()),
+                        ImmutableMap.of("name", "nameTwo",
+                                        "appliances", ImmutableList.of(),
+                                        "id", id2.uuid().toString()));
     }
 
     @Override

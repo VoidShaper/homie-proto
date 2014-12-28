@@ -1,5 +1,6 @@
 package com.thoughtcrafters.homie.infrastructure.http;
 
+import com.google.common.collect.FluentIterable;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Room;
@@ -11,6 +12,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.util.List;
 
 @Path("/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -21,6 +23,13 @@ public class RoomsResource {
 
     public RoomsResource(RoomsApplicationService roomsApplicationService) {
         this.roomsApplicationService = roomsApplicationService;
+    }
+
+    @GET
+    public List<RoomResponse> allRooms() {
+        return FluentIterable.from(roomsApplicationService.getAllRooms())
+                             .transform(RoomResponse::withIdFrom)
+                             .toList();
     }
 
     @POST
@@ -34,7 +43,7 @@ public class RoomsResource {
     @Path("/{roomId}")
     public RoomResponse getRoom(@PathParam("roomId") UUIDParam roomId) {
         Room room = roomsApplicationService.getTheRoomWith(new RoomId(roomId.get()));
-        return RoomResponse.from(room);
+        return RoomResponse.withoutIdFrom(room);
     }
 
     @POST
