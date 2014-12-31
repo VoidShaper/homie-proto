@@ -41,7 +41,9 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     @Test
     public void createsARoomCorrectly() throws JsonProcessingException {
         // given
-        String requestEntity = jsonFrom(ImmutableMap.of("name", "roomName"));
+        String requestEntity = jsonFrom(
+                ImmutableMap.<String, Object>of("name", "roomName",
+                                                "shape", rectangle2x2()));
 
         // when
         ClientResponse response = Client.create()
@@ -60,7 +62,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     @Test
     public void getsACreatedRoomCorrectly() throws JsonProcessingException {
         // given
-        RoomId id = aRoomHasBeenCreatedWith("aRoomName");
+        RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle2x2());
 
         // when
         ClientResponse response = Client.create()
@@ -73,7 +75,8 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getEntity(Map.class))
                 .isEqualTo(ImmutableMap.of(
                         "name", "aRoomName",
-                        "appliances", new ArrayList<ApplianceId>()
+                        "appliances", new ArrayList<ApplianceId>(),
+                        "shape", rectangle2x2()
                 ));
     }
 
@@ -81,7 +84,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     public void addsAnApplianceToTheRoom() throws JsonProcessingException {
         // given
         ApplianceId lightId = aLightHasBeenCreatedWith("lightName", SwitchState.ON);
-        RoomId id = aRoomHasBeenCreatedWith("aRoomName");
+        RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle2x2());
 
         // when
         ClientResponse response = Client.create()
@@ -95,25 +98,17 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aRoomResponseFor(id))
-                .isEqualTo(ImmutableMap.of(
-                        "name", "aRoomName",
-                        "appliances", newArrayList(lightId.uuid().toString())
-                ));
+                .containsEntry("appliances", newArrayList(lightId.uuid().toString()));
 
         assertThat(aLightResponseFor(lightId))
-                .isEqualTo(ImmutableMap.of(
-                        "name", "lightName",
-                        "switchState", "ON",
-                        "type", "LIGHT",
-                        "roomId", id.uuid().toString()
-                ));
+                .containsEntry("roomId", id.uuid().toString());
     }
 
     @Test
     public void removesAnApplianceFromTheRoom() throws JsonProcessingException {
         // given
         ApplianceId lightId = aLightHasBeenCreatedWith("lightName", SwitchState.ON);
-        RoomId id = aRoomHasBeenCreatedWith("aRoomName");
+        RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle2x2());
         anApplianceHasBeenAddedToTheRoom(id, lightId);
 
         // when
@@ -129,24 +124,17 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aRoomResponseFor(id))
-                .isEqualTo(ImmutableMap.of(
-                        "name", "aRoomName",
-                        "appliances", newArrayList()
-                ));
+                .containsEntry("appliances", newArrayList());
 
         assertThat(aLightResponseFor(lightId))
-                .isEqualTo(ImmutableMap.of(
-                        "name", "lightName",
-                        "switchState", "ON",
-                        "type", "LIGHT"
-                ));
+                .doesNotContainKey("roomId");
     }
 
     @Test
     public void getsAllTheRooms() throws Exception {
         // given
-        RoomId id1 = aRoomHasBeenCreatedWith("nameOne");
-        RoomId id2 = aRoomHasBeenCreatedWith("nameTwo");
+        RoomId id1 = aRoomHasBeenCreatedWith("nameOne", rectangle2x2());
+        RoomId id2 = aRoomHasBeenCreatedWith("nameTwo", polygon5p());
 
         // when
         ClientResponse clientResponse = Client.create()
@@ -159,10 +147,12 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                 .containsOnly(
                         ImmutableMap.of("name", "nameOne",
                                         "appliances", ImmutableList.of(),
-                                        "id", id1.uuid().toString()),
+                                        "id", id1.uuid().toString(),
+                                        "shape", rectangle2x2()),
                         ImmutableMap.of("name", "nameTwo",
                                         "appliances", ImmutableList.of(),
-                                        "id", id2.uuid().toString()));
+                                        "id", id2.uuid().toString(),
+                                        "shape", polygon5p()));
     }
 
     @Override

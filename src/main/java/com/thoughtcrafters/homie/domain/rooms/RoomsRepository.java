@@ -6,7 +6,7 @@ import java.util.Optional;
 public interface RoomsRepository {
     Optional<Room> getBy(RoomId applianceId);
 
-    Room createFrom(String name);
+    Room createFrom(String name, Shape shape);
 
     void save(Room room);
 

@@ -1,10 +1,7 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
 import com.google.common.collect.FluentIterable;
-import com.thoughtcrafters.homie.domain.rooms.Room;
-import com.thoughtcrafters.homie.domain.rooms.RoomId;
-import com.thoughtcrafters.homie.domain.rooms.RoomNotFoundException;
-import com.thoughtcrafters.homie.domain.rooms.RoomsRepository;
+import com.thoughtcrafters.homie.domain.rooms.*;
 
 import java.util.*;
 
@@ -23,11 +20,11 @@ public class HashMapRoomsRepository implements RoomsRepository {
     }
 
     @Override
-    public Room createFrom(String name) {
+    public Room createFrom(String name, Shape shape) {
         checkNotNull(name);
 
         RoomId roomId = new RoomId(UUID.randomUUID());
-        Room room = new Room(roomId, name, emptySet());
+        Room room = new Room(roomId, name, shape, emptySet());
         rooms.put(roomId, room);
         return copyOf(room);
     }
@@ -49,7 +46,8 @@ public class HashMapRoomsRepository implements RoomsRepository {
     }
 
     private Room copyOf(Room room) {
-        return new Room(room.id(), room.name(), room.appliances());
+        // TODO this copy is very shallow - but does the job for now
+        return new Room(room.id(), room.name(), room.shape(), room.appliances());
     }
 
     public void clearAll() {

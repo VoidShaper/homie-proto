@@ -34,7 +34,7 @@ public class RoomsResource {
 
     @POST
     public Response createRoom(@Valid NewRoomRequest request) {
-        Room room = roomsApplicationService.createRoomWith(request.getName());
+        Room room = roomsApplicationService.createRoomWith(request.getName(), request.outline());
         return Response.created(UriBuilder.fromPath(room.id().uuid().toString()).build())
                        .build();
     }

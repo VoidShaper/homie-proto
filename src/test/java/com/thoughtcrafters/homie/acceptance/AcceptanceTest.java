@@ -1,6 +1,7 @@
 package com.thoughtcrafters.homie.acceptance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -35,8 +36,11 @@ public abstract class AcceptanceTest {
                          .path(ROOMS_PATH);
     }
 
-    protected RoomId aRoomHasBeenCreatedWith(String aRoomName) throws JsonProcessingException {
-        String requestEntity = jsonFrom(ImmutableMap.of("name", aRoomName));
+    protected RoomId aRoomHasBeenCreatedWith(String aRoomName,
+                                             ImmutableList<ImmutableMap<String, Object>> shape)
+            throws JsonProcessingException {
+        String requestEntity = jsonFrom(ImmutableMap.of("name", aRoomName,
+                                                        "shape", shape));
 
         ClientResponse response = Client.create()
                                         .resource(roomsUri().build())
@@ -61,6 +65,27 @@ public abstract class AcceptanceTest {
                                   .path(applianceId.uuid().toString())
                                   .build())
               .post(ClientResponse.class);
+    }
+
+    protected ImmutableList<ImmutableMap<String, Object>> rectangle2x2() {
+        return ImmutableList.of(
+                ImmutableMap.<String, Object>of("x", num(0), "y", num(0)),
+                ImmutableMap.<String, Object>of("x", num(2), "y", num(0)),
+                ImmutableMap.<String, Object>of("x", num(2), "y", num(2)),
+                ImmutableMap.<String, Object>of("x", num(0), "y", num(2)));
+    }
+
+    protected ImmutableList<ImmutableMap<String, Object>> polygon5p() {
+        return ImmutableList.of(
+                ImmutableMap.<String, Object>of("x", num(1), "y", num(1)),
+                ImmutableMap.<String, Object>of("x", num(4), "y", num(4)),
+                ImmutableMap.<String, Object>of("x", num(3), "y", num(5)),
+                ImmutableMap.<String, Object>of("x", num(2), "y", num(5)),
+                ImmutableMap.<String, Object>of("x", num(0), "y", num(2)));
+    }
+
+    private Double num(double number) {
+        return new Double(number);
     }
 
     public abstract DropwizardAppRule<HomieConfiguration> app();
@@ -96,7 +121,7 @@ public abstract class AcceptanceTest {
         return m.group(0);
     }
 
-    public String jsonFrom(ImmutableMap<String, String> request) throws JsonProcessingException {
+    public String jsonFrom(ImmutableMap<String, Object> request) throws JsonProcessingException {
         return app().getEnvironment().getObjectMapper()
                     .writeValueAsString(request);
     }
