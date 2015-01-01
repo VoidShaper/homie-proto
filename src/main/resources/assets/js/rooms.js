@@ -29,6 +29,23 @@ angular.module('homieApp')
                 });
         };
 
+        $scope.room = {
+           shape: [
+               {x: 0, y: 0},
+               {x: 80, y: 0},
+               {x: 80, y: 80},
+               {x: 0, y: 80}
+           ]
+        };
+
+        $scope.removePoint = function(index) {
+            $scope.room.shape.splice(index, 1);
+        };
+
+        $scope.addPoint = function() {
+            $scope.room.shape.push({x: 0, y: 0})
+        };
+
         $scope.closeAlert = function (index) {
             $scope.alerts.splice(index, 1);
         }
