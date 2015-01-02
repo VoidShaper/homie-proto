@@ -1,11 +1,20 @@
 <div ng-controller="AppliancesController">
     <div class="panel panel-default">
         <div class="panel-heading">Appliances</div>
-        <ul class="list-group">
-            <li class="list-group-item" ng-repeat="appliance in appliances">
-                {{appliance.id}} {{appliance.name}} {{appliance.type}} {{appliance.switchState}}
-            </li>
-        </ul>
+        <table class="table">
+            <tr>
+                <th class="col-md-3">Appliance Id</th>
+                <th class="col-md-2">Name</th>
+                <th class="col-md-2">Type</th>
+                <th class="col-md-2">Switch State</th>
+            </tr>
+            <tr ng-repeat="appliance in appliances">
+                <td>{{appliance.id}}</td>
+                <td>{{appliance.name}}</td>
+                <td>{{appliance.type}}</td>
+                <td>{{appliance.switchState}}</td>
+            </tr>
+        </table>
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">New Appliance</div>

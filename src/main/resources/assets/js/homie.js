@@ -25,6 +25,7 @@ angular.module('homieApp')
                 draw(ctx, shape);
 
                 function draw(ctx, shape) {
+                    ctx.lineWidth = "1";
                     ctx.strokeStyle = '#000';
                     ctx.beginPath();
                     ctx.moveTo(shape[0].x, shape[0].y);

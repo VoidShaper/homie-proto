@@ -1,11 +1,18 @@
 <div ng-controller="RoomsController">
     <div class="panel panel-default">
         <div class="panel-heading">Rooms</div>
-        <ul class="list-group">
-            <li class="list-group-item" ng-repeat="room in rooms">
-                {{room.id}} {{room.name}} <canvas width="100" height="100" roomshape></canvas>
-            </li>
-        </ul>
+        <table class="table">
+            <tr>
+                <th class="col-md-3">Room Id</th>
+                <th class="col-md-2">Name</th>
+                <th class="col-md-5">Shape</th>
+            </tr>
+            <tr ng-repeat="room in rooms">
+                <td>{{room.id}}</td>
+                <td>{{room.name}}</td>
+                <td><canvas width="100" height="100" roomshape></canvas></td>
+            </tr>
+        </table>
     </div>
     <div class="panel panel-default">
         <div class="panel-heading">New Room</div>
@@ -21,6 +28,12 @@
                 </div>
                 <div class="form-group">
                     <ul class="list-group">
+                        <li class="list-group-item list-group-item-heading">
+                            <strong>Shape</strong>
+                        </li>
+                        <li class="list-group-item">
+                            <canvas width="100" height="100" roomshape></canvas>
+                        </li>
                         <li class="list-group-item" ng-repeat="point in room.shape">
                             <label for="x{{$index + 1}}">x{{$index + 1}}</label>
                             <input ng-model="point.x" type="number" id="x{{$index + 1}}" min="0" max="100"/>
@@ -31,11 +44,7 @@
                             <button class="btn btn-link" ng-click="removePoint($index)">remove</button>
                         </li>
                     </ul>
-
                     <button class="btn btn-default" ng-click="addPoint()">Add Point</button>
-                </div>
-                <div class="form-group">
-                    <canvas width="100" height="100" roomshape></canvas>
                 </div>
                 <button class="btn btn-primary" ng-click="newRoom()">Create Room</button>
             </form>
