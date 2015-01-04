@@ -37,4 +37,8 @@ public class PointBody {
     public static PointBody from(Point point) {
         return new PointBody(point.x(), point.y());
     }
+
+    public Point asPoint() {
+        return new Point(x, y);
+    }
 }

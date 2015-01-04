@@ -35,11 +35,13 @@ public class RoomsApplicationService {
         return roomsRepository.getAll();
     }
 
-    public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId) {
+    // TODO implement error handling when light is already in another room
+    // TODO error handling when either room or light is not found
+    public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId, Point point) {
         Optional<Room> room = roomsRepository.getBy(roomId);
         Optional<Light> light = lightsRepository.getBy(applianceId);
         if(room.isPresent() && light.isPresent()) {
-            room.get().addApplicance(light.get());
+            room.get().place(light.get()).at(point);
             roomsRepository.save(room.get());
             lightsRepository.save(light.get());
         }
@@ -49,7 +51,7 @@ public class RoomsApplicationService {
         Optional<Room> room = roomsRepository.getBy(roomId);
         Optional<Light> light = lightsRepository.getBy(applianceId);
         if(room.isPresent() && light.isPresent()) {
-            room.get().removeAppliance(light.get());
+            room.get().remove(light.get());
             roomsRepository.save(room.get());
             lightsRepository.save(light.get());
         }

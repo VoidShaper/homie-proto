@@ -24,7 +24,7 @@ public class HashMapRoomsRepository implements RoomsRepository {
         checkNotNull(name);
 
         RoomId roomId = new RoomId(UUID.randomUUID());
-        Room room = new Room(roomId, name, shape, emptySet());
+        Room room = new Room(roomId, name, shape);
         rooms.put(roomId, room);
         return copyOf(room);
     }

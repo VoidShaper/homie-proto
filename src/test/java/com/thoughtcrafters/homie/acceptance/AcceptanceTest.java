@@ -8,6 +8,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
+import com.thoughtcrafters.homie.domain.rooms.Point;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 
@@ -58,21 +59,25 @@ public abstract class AcceptanceTest {
         return response.getEntity(Map.class);
     }
 
-    protected void anApplianceHasBeenAddedToTheRoom(RoomId id, ApplianceId applianceId) {
+    protected void anApplianceHasBeenAddedToTheRoom(RoomId id, ApplianceId applianceId, Point point)
+            throws JsonProcessingException {
+        String request = jsonFrom(ImmutableMap.of("x", num(point.x()),
+                                                  "y", num(point.y())));
         Client.create()
               .resource(roomsUri().path(id.uuid().toString())
-                                  .path("add")
+                                  .path("appliances")
                                   .path(applianceId.uuid().toString())
                                   .build())
-              .post(ClientResponse.class);
+              .entity(request, MediaType.APPLICATION_JSON_TYPE)
+              .put(ClientResponse.class);
     }
 
-    protected ImmutableList<ImmutableMap<String, Object>> rectangle2x2() {
+    protected ImmutableList<ImmutableMap<String, Object>> rectangle20x20() {
         return ImmutableList.of(
                 ImmutableMap.<String, Object>of("x", num(0), "y", num(0)),
-                ImmutableMap.<String, Object>of("x", num(2), "y", num(0)),
-                ImmutableMap.<String, Object>of("x", num(2), "y", num(2)),
-                ImmutableMap.<String, Object>of("x", num(0), "y", num(2)));
+                ImmutableMap.<String, Object>of("x", num(20), "y", num(0)),
+                ImmutableMap.<String, Object>of("x", num(20), "y", num(20)),
+                ImmutableMap.<String, Object>of("x", num(0), "y", num(20)));
     }
 
     protected ImmutableList<ImmutableMap<String, Object>> polygon5p() {
@@ -84,7 +89,7 @@ public abstract class AcceptanceTest {
                 ImmutableMap.<String, Object>of("x", num(0), "y", num(2)));
     }
 
-    private Double num(double number) {
+    protected Double num(double number) {
         return new Double(number);
     }
 

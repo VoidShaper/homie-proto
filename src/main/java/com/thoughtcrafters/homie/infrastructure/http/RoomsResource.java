@@ -46,19 +46,21 @@ public class RoomsResource {
         return RoomResponse.withoutIdFrom(room);
     }
 
-    @POST
-    @Path("/{roomId}/add/{applianceId}")
+    @PUT
+    @Path("/{roomId}/appliances/{applianceId}")
     public Response addApplianceToRoom(@PathParam("roomId") UUIDParam roomId,
-                                       @PathParam("applianceId") UUIDParam applianceId) {
+                                       @PathParam("applianceId") UUIDParam applianceId,
+                                       @Valid PointBody pointBody) {
         roomsApplicationService.addApplianceToRoom(new ApplianceId(applianceId.get()),
-                                                   new RoomId(roomId.get()));
+                                                   new RoomId(roomId.get()),
+                                                   pointBody.asPoint());
         return Response.noContent().build();
     }
 
-    @POST
-    @Path("/{roomId}/remove/{applianceId}")
-    public Response removeApplianceToRoom(@PathParam("roomId") UUIDParam roomId,
-                                          @PathParam("applianceId") UUIDParam applianceId) {
+    @DELETE
+    @Path("/{roomId}/appliances/{applianceId}")
+    public Response removeApplianceFromRoom(@PathParam("roomId") UUIDParam roomId,
+                                            @PathParam("applianceId") UUIDParam applianceId) {
         roomsApplicationService.removeApplianceFromRoom(new ApplianceId(applianceId.get()),
                                                         new RoomId(roomId.get()));
         return Response.noContent().build();

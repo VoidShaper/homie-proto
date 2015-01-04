@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoomsRepository {
+    // TODO refactor this to return  Room and throw exception if not found
     Optional<Room> getBy(RoomId applianceId);
 
     Room createFrom(String name, Shape shape);

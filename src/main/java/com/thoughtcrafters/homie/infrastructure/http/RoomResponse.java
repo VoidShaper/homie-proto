@@ -7,16 +7,17 @@ import com.thoughtcrafters.homie.domain.rooms.Point;
 import com.thoughtcrafters.homie.domain.rooms.Room;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RoomResponse {
     private UUID id;
     private String name;
-    private List<UUID> appliances;
+    private Map<UUID, PointBody> appliances;
     private List<PointBody> shape;
 
-    private RoomResponse(UUID id, String name, List<UUID> appliances, List<PointBody> shape) {
+    private RoomResponse(UUID id, String name, Map<UUID, PointBody> appliances, List<PointBody> shape) {
         this.id = id;
         this.name = name;
         this.appliances = appliances;
@@ -31,7 +32,7 @@ public class RoomResponse {
         return name;
     }
 
-    public List<UUID> getAppliances() {
+    public Map<UUID, PointBody> getAppliances() {
         return appliances;
     }
 
@@ -43,7 +44,7 @@ public class RoomResponse {
         return new RoomResponse(
                 null,
                 room.name(),
-                room.appliances().stream().map(ApplianceId::uuid).collect(Collectors.toList()),
+                map(room.appliances()),
                 pointBodyFrom(room));
     }
 
@@ -51,8 +52,14 @@ public class RoomResponse {
         return new RoomResponse(
                 room.id().uuid(),
                 room.name(),
-                room.appliances().stream().map(ApplianceId::uuid).collect(Collectors.toList()),
+                map(room.appliances()),
                 pointBodyFrom(room));
+    }
+
+    private static Map<UUID, PointBody> map(Map<ApplianceId, Point> appliances1) {
+        return appliances1.entrySet().stream().collect(
+                Collectors.toMap(e -> e.getKey().uuid(),
+                                 e -> PointBody.from(e.getValue())));
     }
 
     private static ImmutableList<PointBody> pointBodyFrom(Room room) {
