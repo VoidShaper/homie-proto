@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LightsRepository {
-    Optional<Light> getBy(ApplianceId applianceId);
+    Light getBy(ApplianceId applianceId);
 
     Light createFrom(String name, SwitchState initialState);
 

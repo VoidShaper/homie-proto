@@ -1,17 +1,11 @@
 package com.thoughtcrafters.homie.application;
 
-import com.thoughtcrafters.homie.domain.appliances.Appliance;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.lights.LightsRepository;
-import com.thoughtcrafters.homie.infrastructure.http.ApplianceResponse;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class LightsApplicationService {
     private final LightsRepository lightsRepository;
@@ -21,11 +15,7 @@ public class LightsApplicationService {
     }
 
     public Light getTheLightWith(ApplianceId id) {
-        Optional<Light> light = lightsRepository.getBy(id);
-        if(light.isPresent()) {
-            return light.get();
-        }
-        throw new ApplianceNotFoundException(id, ApplianceType.LIGHT);
+        return lightsRepository.getBy(id);
     }
 
     public Light createLightFrom(String name, SwitchState initialState) {
@@ -58,14 +48,9 @@ public class LightsApplicationService {
         }
 
         public void onLightWith(ApplianceId applianceId) {
-            Optional<Light> light = lightsRepository.getBy(applianceId);
-            if(light.isPresent()) {
-                lightAction.on(light.get());
-                lightsRepository.save(light.get());
-                return;
-            }
-
-            throw new ApplianceNotFoundException(applianceId, ApplianceType.LIGHT);
+            Light light = lightsRepository.getBy(applianceId);
+            lightAction.on(light);
+            lightsRepository.save(light);
         }
     }
 

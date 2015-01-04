@@ -18,10 +18,11 @@ public class HashMapLightsRepository implements LightsRepository {
     private Map<ApplianceId, Light> lights = new HashMap<>();
 
     @Override
-    public Optional<Light> getBy(ApplianceId applianceId) {
-        return lights.containsKey(applianceId) ?
-                Optional.of(copyOf(lights.get(applianceId)))
-                : Optional.<Light>empty();
+    public Light getBy(ApplianceId applianceId) {
+        if(lights.containsKey(applianceId)) {
+            return copyOf(lights.get(applianceId));
+        }
+        throw new ApplianceNotFoundException(applianceId, ApplianceType.LIGHT);
     }
 
     @Override

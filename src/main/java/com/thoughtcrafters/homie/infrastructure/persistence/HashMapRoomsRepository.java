@@ -1,22 +1,30 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
 import com.google.common.collect.FluentIterable;
-import com.thoughtcrafters.homie.domain.rooms.*;
+import com.thoughtcrafters.homie.domain.rooms.Room;
+import com.thoughtcrafters.homie.domain.rooms.RoomId;
+import com.thoughtcrafters.homie.domain.rooms.RoomNotFoundException;
+import com.thoughtcrafters.homie.domain.rooms.RoomsRepository;
+import com.thoughtcrafters.homie.domain.rooms.Shape;
 
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptySet;
 
 public class HashMapRoomsRepository implements RoomsRepository {
 
     private Map<RoomId, Room> rooms = new HashMap<>();
 
     @Override
-    public Optional<Room> getBy(RoomId applianceId) {
-        return rooms.containsKey(applianceId) ?
-                Optional.of(copyOf(rooms.get(applianceId)))
-                : Optional.<Room>empty();
+    public Room getBy(RoomId roomId) {
+        if(rooms.containsKey(roomId)) {
+            return copyOf(rooms.get(roomId));
+        }
+        throw new RoomNotFoundException(roomId);
     }
 
     @Override

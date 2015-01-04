@@ -20,11 +20,7 @@ public class RoomsApplicationService {
     }
 
     public Room getTheRoomWith(RoomId id) {
-        Optional<Room> room = roomsRepository.getBy(id);
-        if(room.isPresent()) {
-            return room.get();
-        }
-        throw new RoomNotFoundException(id);
+        return roomsRepository.getBy(id);
     }
 
     public Room createRoomWith(String name, List<Point> outline) {
@@ -38,22 +34,18 @@ public class RoomsApplicationService {
     // TODO implement error handling when light is already in another room
     // TODO error handling when either room or light is not found
     public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId, Point point) {
-        Optional<Room> room = roomsRepository.getBy(roomId);
-        Optional<Light> light = lightsRepository.getBy(applianceId);
-        if(room.isPresent() && light.isPresent()) {
-            room.get().place(light.get()).at(point);
-            roomsRepository.save(room.get());
-            lightsRepository.save(light.get());
-        }
+        Room room = roomsRepository.getBy(roomId);
+        Light light = lightsRepository.getBy(applianceId);
+        room.place(light).at(point);
+        roomsRepository.save(room);
+        lightsRepository.save(light);
     }
 
     public void removeApplianceFromRoom(ApplianceId applianceId, RoomId roomId) {
-        Optional<Room> room = roomsRepository.getBy(roomId);
-        Optional<Light> light = lightsRepository.getBy(applianceId);
-        if(room.isPresent() && light.isPresent()) {
-            room.get().remove(light.get());
-            roomsRepository.save(room.get());
-            lightsRepository.save(light.get());
-        }
+        Room room = roomsRepository.getBy(roomId);
+        Light light = lightsRepository.getBy(applianceId);
+        room.remove(light);
+        roomsRepository.save(room);
+        lightsRepository.save(light);
     }
 }
