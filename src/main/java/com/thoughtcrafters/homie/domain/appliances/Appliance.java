@@ -3,6 +3,7 @@ package com.thoughtcrafters.homie.domain.appliances;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,6 +36,8 @@ public abstract class Appliance {
     }
 
     public abstract ApplianceType type();
+
+    public abstract Set<Operation> operations();
 
     public Optional<RoomId> roomId() {
         return roomId;

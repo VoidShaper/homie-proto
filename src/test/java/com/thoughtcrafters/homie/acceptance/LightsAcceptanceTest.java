@@ -1,6 +1,7 @@
 package com.thoughtcrafters.homie.acceptance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -17,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 
 import java.util.*;
 
@@ -88,7 +90,9 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                 .isEqualTo(ImmutableMap.of(
                         "switchState", switchState.name(),
                         "name", "aName",
-                        "type", "LIGHT"
+                        "type", "LIGHT",
+                        "operations", ImmutableList.of(operation(id, "on", "turn on"),
+                                                       operation(id, "off", "turn off"))
                 ));
     }
 
@@ -123,11 +127,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aLightResponseFor(id))
-                .isEqualTo(ImmutableMap.of(
-                        "switchState", SwitchState.ON.name(),
-                        "name", "aName",
-                        "type", "LIGHT"
-                ));
+                .containsEntry("switchState", SwitchState.ON.name());
     }
 
     @Test
@@ -144,11 +144,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aLightResponseFor(id))
-                .isEqualTo(ImmutableMap.of(
-                        "switchState", SwitchState.OFF.name(),
-                        "name", "aName",
-                        "type", "LIGHT"
-                ));
+                .containsEntry("switchState", SwitchState.OFF.name());
     }
 
     @Test
@@ -187,7 +183,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     public void getsBothAddedAppliancesWhenGettingAll() throws JsonProcessingException {
         // given
         ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLightOff", SwitchState.OFF);
-        ApplianceId lIghtOnId = aLightHasBeenCreatedWith("secondLightOn", SwitchState.ON);
+        ApplianceId lightOnId = aLightHasBeenCreatedWith("secondLightOn", SwitchState.ON);
 
         // when
         ClientResponse response = Client.create()
@@ -196,16 +192,34 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat((List<Map<String, String>>) response.getEntity(List.class))
+        assertThat((List<Map<String, Object>>) response.getEntity(List.class))
                 .containsOnly(
                         ImmutableMap.of("name", "firstLightOff",
                                         "switchState", SwitchState.OFF.name(),
                                         "id", lightOffId.uuid().toString(),
-                                        "type", "LIGHT"),
+                                        "type", "LIGHT",
+                                        "operations", ImmutableList.of(operation(lightOffId, "on", "turn on"),
+                                                                       operation(lightOffId, "off", "turn off"))
+                        ),
                         ImmutableMap.of("name", "secondLightOn",
                                         "switchState", SwitchState.ON.name(),
-                                        "id", lIghtOnId.uuid().toString(),
-                                        "type", "LIGHT"));
+                                        "id", lightOnId.uuid().toString(),
+                                        "type", "LIGHT",
+                                        "operations", ImmutableList.of(operation(lightOnId, "on", "turn on"),
+                                                                       operation(lightOnId, "off", "turn off"))
+                        ));
+    }
+
+    private ImmutableMap<String, Object> operation(ApplianceId id,
+                                                   String operationPath,
+                                                   String description) {
+        return ImmutableMap.of("url", UriBuilder.fromPath("/appliances")
+                                                .path(id.uuid().toString())
+                                                .path(operationPath)
+                                                .build()
+                                                .toString(),
+                               "method", "POST",
+                               "description", description);
     }
 
     @Override

@@ -1,13 +1,16 @@
 package com.thoughtcrafters.homie.domain.lights;
 
+import com.google.common.collect.ImmutableSet;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.Operation;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.behaviours.Switchable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class Light extends Appliance implements  Switchable {
 
@@ -28,6 +31,11 @@ public class Light extends Appliance implements  Switchable {
     @Override
     public ApplianceType type() {
         return ApplianceType.LIGHT;
+    }
+
+    @Override
+    public Set<Operation> operations() {
+        return ImmutableSet.of(Operation.TURN_ON, Operation.TURN_OFF);
     }
 
     @Override
