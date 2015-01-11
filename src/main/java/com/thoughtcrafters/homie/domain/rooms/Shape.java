@@ -1,7 +1,6 @@
 package com.thoughtcrafters.homie.domain.rooms;
 
 import com.google.common.collect.ImmutableList;
-import com.thoughtcrafters.homie.infrastructure.http.PointBody;
 
 import java.util.List;
 

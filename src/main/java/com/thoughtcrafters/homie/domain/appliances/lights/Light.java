@@ -1,16 +1,20 @@
-package com.thoughtcrafters.homie.domain.lights;
+package com.thoughtcrafters.homie.domain.appliances.lights;
 
 import com.google.common.collect.ImmutableSet;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
-import com.thoughtcrafters.homie.domain.appliances.Operation;
+import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyType;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdate;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.behaviours.Switchable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
 import java.util.Set;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 public class Light extends Appliance implements  Switchable {
 
@@ -35,7 +39,11 @@ public class Light extends Appliance implements  Switchable {
 
     @Override
     public Set<Operation> operations() {
-        return ImmutableSet.of(Operation.TURN_ON, Operation.TURN_OFF);
+        return ImmutableSet.of(new PropertyUpdate(id,
+                                                  "turn on or off",
+                                                  "switchState",
+                                                  PropertyType.ENUM,
+                                                  Optional.of(newArrayList("ON", "OFF"))));
     }
 
     @Override

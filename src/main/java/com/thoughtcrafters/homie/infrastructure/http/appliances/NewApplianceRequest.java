@@ -1,4 +1,4 @@
-package com.thoughtcrafters.homie.infrastructure.http;
+package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;

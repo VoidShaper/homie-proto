@@ -1,12 +1,11 @@
 package com.thoughtcrafters.homie.application;
 
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
-import com.thoughtcrafters.homie.domain.lights.Light;
-import com.thoughtcrafters.homie.domain.lights.LightsRepository;
+import com.thoughtcrafters.homie.domain.appliances.lights.Light;
+import com.thoughtcrafters.homie.domain.appliances.lights.LightsRepository;
 import com.thoughtcrafters.homie.domain.rooms.*;
 
 import java.util.List;
-import java.util.Optional;
 
 public class RoomsApplicationService {
 

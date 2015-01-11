@@ -1,11 +1,17 @@
 package com.thoughtcrafters.homie;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.thoughtcrafters.homie.application.LightsApplicationService;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
-import com.thoughtcrafters.homie.infrastructure.http.AppliancesResource;
-import com.thoughtcrafters.homie.infrastructure.http.RoomsResource;
-import com.thoughtcrafters.homie.infrastructure.http.mappers.LightNotFoundExceptionMapper;
+import com.thoughtcrafters.homie.domain.appliances.lights.Light;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdate;
+import com.thoughtcrafters.homie.infrastructure.http.appliances.AppliancesResource;
+import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
+import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateSerializer;
+import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
+import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapLightsRepository;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
 import io.dropwizard.Application;
@@ -33,6 +39,10 @@ public class HomieApplication extends Application<HomieConfiguration> {
     @Override
     public void run(HomieConfiguration configuration, Environment environment) throws Exception {
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        SimpleModule homieModule = new SimpleModule("HomieModule");
+        homieModule.addSerializer(Light.class, new LightSerializer());
+        homieModule.addSerializer(PropertyUpdate.class, new PropertyUpdateSerializer());
+        environment.getObjectMapper().registerModule(homieModule);
 
         environment.jersey().register(new LightNotFoundExceptionMapper());
         lightsRepository = new HashMapLightsRepository();
@@ -40,6 +50,7 @@ public class HomieApplication extends Application<HomieConfiguration> {
         roomsRepository = new HashMapRoomsRepository();
         environment.jersey()
                    .register(new RoomsResource(new RoomsApplicationService(roomsRepository, lightsRepository)));
+
     }
 
     public static void main(String[] args) throws Exception {

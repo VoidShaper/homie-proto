@@ -1,10 +1,9 @@
-package com.thoughtcrafters.homie.domain.lights;
+package com.thoughtcrafters.homie.domain.appliances.lights;
 
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface LightsRepository {
     Light getBy(ApplianceId applianceId);

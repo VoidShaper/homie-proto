@@ -1,4 +1,4 @@
-package com.thoughtcrafters.homie.infrastructure.http.mappers;
+package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
 import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
 import org.slf4j.Logger;

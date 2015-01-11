@@ -1,9 +1,9 @@
-package com.thoughtcrafters.homie.infrastructure.http;
+package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
-import com.google.common.collect.FluentIterable;
 import com.thoughtcrafters.homie.application.LightsApplicationService;
+import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
-import com.thoughtcrafters.homie.domain.lights.Light;
+import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import io.dropwizard.jersey.params.UUIDParam;
 
 import javax.validation.Valid;
@@ -32,17 +32,14 @@ public class AppliancesResource {
     }
 
     @GET
-    public List<ApplianceResponse> getAllAppliances() {
-        return FluentIterable.from(lightsApplicationService.getAllAppliances())
-                             .transform(ApplianceResponse::withIdFrom)
-                             .toList();
+    public List<Light> getAllAppliances() {
+        return lightsApplicationService.getAllAppliances();
     }
 
     @GET
     @Path("/{applianceId}")
-    public ApplianceResponse getAppliance(@PathParam("applianceId") UUIDParam applianceId) {
-        return ApplianceResponse.withoutIdFrom(
-                lightsApplicationService.getTheLightWith(new ApplianceId(applianceId.get())));
+    public Appliance getAppliance(@PathParam("applianceId") UUIDParam applianceId) {
+        return lightsApplicationService.getTheLightWith(new ApplianceId(applianceId.get()));
     }
 
     @POST

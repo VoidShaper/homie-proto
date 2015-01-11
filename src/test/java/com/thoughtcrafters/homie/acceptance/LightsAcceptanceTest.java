@@ -33,6 +33,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     public static final DropwizardAppRule<HomieConfiguration> app =
             new DropwizardAppRule<>(HomieApplication.class, "homie.yml");
 
+    public static final String SWITCH_DESCRIPTION = "turn on or off";
+
     private SwitchState switchState;
 
     @Parameterized.Parameters
@@ -88,11 +90,15 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         assertThat(response.getEntity(Map.class))
                 .isEqualTo(ImmutableMap.of(
+                        "id", id.uuid().toString(),
                         "switchState", switchState.name(),
                         "name", "aName",
                         "type", "LIGHT",
-                        "operations", ImmutableList.of(operation(id, "on", "turn on"),
-                                                       operation(id, "off", "turn off"))
+                        "operations", ImmutableList.of(
+                                patchEnum(id,
+                                          "switchState",
+                                          SWITCH_DESCRIPTION,
+                                          ImmutableList.of("ON", "OFF")))
                 ));
     }
 
@@ -198,28 +204,36 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                         "switchState", SwitchState.OFF.name(),
                                         "id", lightOffId.uuid().toString(),
                                         "type", "LIGHT",
-                                        "operations", ImmutableList.of(operation(lightOffId, "on", "turn on"),
-                                                                       operation(lightOffId, "off", "turn off"))
-                        ),
+                                        "operations",
+                                        ImmutableList.of(
+                                                patchEnum(lightOffId, "switchState", SWITCH_DESCRIPTION,
+                                                          ImmutableList.of("ON", "OFF")
+                                                ))),
                         ImmutableMap.of("name", "secondLightOn",
                                         "switchState", SwitchState.ON.name(),
                                         "id", lightOnId.uuid().toString(),
                                         "type", "LIGHT",
-                                        "operations", ImmutableList.of(operation(lightOnId, "on", "turn on"),
-                                                                       operation(lightOnId, "off", "turn off"))
-                        ));
+                                        "operations",
+                                        ImmutableList.of(
+                                                patchEnum(lightOnId, "switchState", SWITCH_DESCRIPTION,
+                                                          ImmutableList.of("ON", "OFF")
+                                                ))));
     }
 
-    private ImmutableMap<String, Object> operation(ApplianceId id,
-                                                   String operationPath,
-                                                   String description) {
-        return ImmutableMap.of("url", UriBuilder.fromPath("/appliances")
-                                                .path(id.uuid().toString())
-                                                .path(operationPath)
-                                                .build()
-                                                .toString(),
-                               "method", "POST",
-                               "description", description);
+    private ImmutableMap<String, Object> patchEnum(ApplianceId id,
+                                                   String field,
+                                                   String description,
+                                                   ImmutableList<String> enumValues) {
+        return ImmutableMap.<String, Object>builder()
+                           .put("uri", UriBuilder.fromPath("/appliances/{applianceId}")
+                                                 .build(id.uuid().toString())
+                                                 .toString())
+                           .put("description", description)
+                           .put("method", "PATCH")
+                           .put("property", field)
+                           .put("propertyType", "ENUM")
+                           .put("enumValues", enumValues)
+                           .build();
     }
 
     @Override

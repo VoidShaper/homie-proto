@@ -1,5 +1,6 @@
 package com.thoughtcrafters.homie.domain.appliances;
 
+import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
@@ -41,5 +42,9 @@ public abstract class Appliance {
 
     public Optional<RoomId> roomId() {
         return roomId;
+    }
+
+    public <T> void updateProperty(String propertyName, T propertyValue) {
+        throw new PropertyUpdateNotAvailable(id, propertyName, propertyValue.toString());
     }
 }

@@ -1,4 +1,4 @@
-package com.thoughtcrafters.homie.infrastructure.http;
+package com.thoughtcrafters.homie.infrastructure.http.rooms;
 
 import com.thoughtcrafters.homie.domain.rooms.Point;
 

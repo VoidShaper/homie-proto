@@ -1,12 +1,13 @@
 package com.thoughtcrafters.homie.infrastructure.persistence;
 
 import com.google.common.collect.FluentIterable;
+import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
-import com.thoughtcrafters.homie.domain.lights.Light;
+import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
-import com.thoughtcrafters.homie.domain.lights.LightsRepository;
+import com.thoughtcrafters.homie.domain.appliances.lights.LightsRepository;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.*;
@@ -20,7 +21,7 @@ public class HashMapLightsRepository implements LightsRepository {
     @Override
     public Light getBy(ApplianceId applianceId) {
         if(lights.containsKey(applianceId)) {
-            return copyOf(lights.get(applianceId));
+            return (Light) copyOf(lights.get(applianceId));
         }
         throw new ApplianceNotFoundException(applianceId, ApplianceType.LIGHT);
     }
@@ -32,7 +33,7 @@ public class HashMapLightsRepository implements LightsRepository {
         ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
         Light light = new Light(applianceId, name, Optional.<RoomId>empty(), initialState);
         lights.put(applianceId, light);
-        return copyOf(light);
+        return (Light) copyOf(light);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class HashMapLightsRepository implements LightsRepository {
         if(!lights.containsKey(light.id())) {
             throw new ApplianceNotFoundException(light.id(), ApplianceType.LIGHT);
         }
-        lights.put(light.id(), copyOf(light));
+        lights.put(light.id(), (Light) copyOf(light));
     }
 
     @Override
