@@ -84,7 +84,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     @Test
     public void addsAnApplianceToTheRoom() throws JsonProcessingException {
         // given
-        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", SwitchState.ON);
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
 
         String request = jsonFrom(ImmutableMap.of("x", num(5),
@@ -114,7 +114,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     @Test
     public void removesAnApplianceFromTheRoom() throws JsonProcessingException {
         // given
-        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", SwitchState.ON);
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
         anApplianceHasBeenAddedToTheRoom(id, lightId, new Point(8, 12));
 

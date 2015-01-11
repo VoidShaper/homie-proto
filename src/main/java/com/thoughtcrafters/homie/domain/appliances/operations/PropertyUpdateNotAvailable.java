@@ -1,4 +1,6 @@
-package com.thoughtcrafters.homie.domain.appliances;
+package com.thoughtcrafters.homie.domain.appliances.operations;
+
+import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 
 public class PropertyUpdateNotAvailable extends RuntimeException {
     public PropertyUpdateNotAvailable(ApplianceId applianceId, String propertyName, String propertyValue) {

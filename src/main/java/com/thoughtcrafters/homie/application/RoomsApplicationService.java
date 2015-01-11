@@ -1,8 +1,8 @@
 package com.thoughtcrafters.homie.application;
 
+import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
-import com.thoughtcrafters.homie.domain.appliances.lights.Light;
-import com.thoughtcrafters.homie.domain.appliances.lights.LightsRepository;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceRepository;
 import com.thoughtcrafters.homie.domain.rooms.*;
 
 import java.util.List;
@@ -10,12 +10,12 @@ import java.util.List;
 public class RoomsApplicationService {
 
     private final RoomsRepository roomsRepository;
-    private final LightsRepository lightsRepository;
+    private final ApplianceRepository applianceRepository;
 
     public RoomsApplicationService(RoomsRepository roomsRepository,
-                                   LightsRepository lightsRepository) {
+                                   ApplianceRepository applianceRepository) {
         this.roomsRepository = roomsRepository;
-        this.lightsRepository = lightsRepository;
+        this.applianceRepository = applianceRepository;
     }
 
     public Room getTheRoomWith(RoomId id) {
@@ -34,17 +34,17 @@ public class RoomsApplicationService {
     // TODO error handling when either room or light is not found
     public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId, Point point) {
         Room room = roomsRepository.getBy(roomId);
-        Light light = lightsRepository.getBy(applianceId);
-        room.place(light).at(point);
+        Appliance appliance = applianceRepository.getBy(applianceId);
+        room.place(appliance).at(point);
         roomsRepository.save(room);
-        lightsRepository.save(light);
+        applianceRepository.save(appliance);
     }
 
     public void removeApplianceFromRoom(ApplianceId applianceId, RoomId roomId) {
         Room room = roomsRepository.getBy(roomId);
-        Light light = lightsRepository.getBy(applianceId);
-        room.remove(light);
+        Appliance appliance = applianceRepository.getBy(applianceId);
+        room.remove(appliance);
         roomsRepository.save(room);
-        lightsRepository.save(light);
+        applianceRepository.save(appliance);
     }
 }

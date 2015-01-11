@@ -1,9 +1,8 @@
 package com.thoughtcrafters.homie;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.thoughtcrafters.homie.application.LightsApplicationService;
+import com.thoughtcrafters.homie.application.AppliancesApplicationService;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdate;
@@ -12,7 +11,7 @@ import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExceptionMapper;
-import com.thoughtcrafters.homie.infrastructure.persistence.HashMapLightsRepository;
+import com.thoughtcrafters.homie.infrastructure.persistence.HashMapApplianceRepository;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
@@ -25,7 +24,7 @@ public class HomieApplication extends Application<HomieConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(HomieApplication.class);
     private HashMapRoomsRepository roomsRepository;
-    private HashMapLightsRepository lightsRepository;
+    private HashMapApplianceRepository applianceRepository;
 
     @Override
     public void initialize(Bootstrap<HomieConfiguration> bootstrap) {
@@ -45,11 +44,11 @@ public class HomieApplication extends Application<HomieConfiguration> {
         environment.getObjectMapper().registerModule(homieModule);
 
         environment.jersey().register(new LightNotFoundExceptionMapper());
-        lightsRepository = new HashMapLightsRepository();
-        environment.jersey().register(new AppliancesResource(new LightsApplicationService(lightsRepository)));
+        applianceRepository = new HashMapApplianceRepository();
+        environment.jersey().register(new AppliancesResource(new AppliancesApplicationService(applianceRepository)));
         roomsRepository = new HashMapRoomsRepository();
         environment.jersey()
-                   .register(new RoomsResource(new RoomsApplicationService(roomsRepository, lightsRepository)));
+                   .register(new RoomsResource(new RoomsApplicationService(roomsRepository, applianceRepository)));
 
     }
 
@@ -59,6 +58,6 @@ public class HomieApplication extends Application<HomieConfiguration> {
 
     public void clearAllData() {
         roomsRepository.clearAll();
-        lightsRepository.clearAll();
+        applianceRepository.clearAll();
     }
 }

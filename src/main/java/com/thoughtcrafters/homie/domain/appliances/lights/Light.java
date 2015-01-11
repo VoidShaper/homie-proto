@@ -20,6 +20,10 @@ public class Light extends Appliance implements  Switchable {
 
     private SwitchState switchState;
 
+    public Light(ApplianceId id, String name, Optional<RoomId> roomId) {
+        this(id, name, roomId, SwitchState.OFF);
+    }
+
     public Light(ApplianceId id,
                  String name,
                  Optional<RoomId> roomId,
@@ -63,6 +67,11 @@ public class Light extends Appliance implements  Switchable {
     @Override
     public SwitchState state() {
         return this.switchState;
+    }
+
+    @Override
+    public Appliance copy() {
+        return new Light(id, name, roomId, switchState);
     }
 
     @Override

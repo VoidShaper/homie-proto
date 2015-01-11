@@ -14,8 +14,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -26,7 +24,6 @@ import static com.thoughtcrafters.homie.TestUtils.UUID_REGEX;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(Parameterized.class)
 public class LightsAcceptanceTest extends AcceptanceTest {
 
     @ClassRule
@@ -35,23 +32,9 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
     public static final String SWITCH_DESCRIPTION = "turn on or off";
 
-    private SwitchState switchState;
-
-    @Parameterized.Parameters
-    public static Collection switchStates() {
-        return Arrays.asList(new Object[][]{
-                {SwitchState.ON},
-                {SwitchState.OFF}
-        });
-    }
-
     @After
     public void tearDown() throws Exception {
         app.<HomieApplication>getApplication().clearAllData();
-    }
-
-    public LightsAcceptanceTest(SwitchState switchState) {
-        this.switchState = switchState;
     }
 
     @Test
@@ -59,7 +42,6 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // given
         String requestEntity = jsonFrom(ImmutableMap.of(
                 "name", "testName",
-                "initialState", switchState.name(),
                 "type", "LIGHT"));
 
         // when
@@ -78,7 +60,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void getsACreatedLightCorrectly() throws JsonProcessingException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName", switchState);
+        ApplianceId id = aLightHasBeenCreatedWith("aName");
 
         // when
         ClientResponse response = Client.create()
@@ -91,7 +73,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getEntity(Map.class))
                 .isEqualTo(ImmutableMap.of(
                         "id", id.uuid().toString(),
-                        "switchState", switchState.name(),
+                        "switchState", SwitchState.OFF.name(),
                         "name", "aName",
                         "type", "LIGHT",
                         "operations", ImmutableList.of(
@@ -122,7 +104,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void turnsALightOnCorrectly() throws JsonProcessingException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName", switchState);
+        ApplianceId id = aLightHasBeenCreatedWith("aName");
 
         // when
         ClientResponse response = Client.create()
@@ -139,7 +121,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void turnsALightOffCorrectly() throws JsonProcessingException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName", switchState);
+        ApplianceId id = aLightHasBeenCreatedWith("aName");
 
         // when
         ClientResponse response = Client.create()
@@ -162,7 +144,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         ClientResponse response =
                 Client.create()
                       .resource(appliancesUri().path(id.uuid().toString())
-                                               .path(switchState.name().toLowerCase()).build())
+                                               .path(SwitchState.OFF.name().toLowerCase()).build())
                       .post(ClientResponse.class);
 
         // then
@@ -188,8 +170,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void getsBothAddedAppliancesWhenGettingAll() throws JsonProcessingException {
         // given
-        ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLightOff", SwitchState.OFF);
-        ApplianceId lightOnId = aLightHasBeenCreatedWith("secondLightOn", SwitchState.ON);
+        ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLight");
+        ApplianceId lightOnId = aLightHasBeenCreatedWith("secondLight");
 
         // when
         ClientResponse response = Client.create()
@@ -200,7 +182,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat((List<Map<String, Object>>) response.getEntity(List.class))
                 .containsOnly(
-                        ImmutableMap.of("name", "firstLightOff",
+                        ImmutableMap.of("name", "firstLight",
                                         "switchState", SwitchState.OFF.name(),
                                         "id", lightOffId.uuid().toString(),
                                         "type", "LIGHT",
@@ -209,8 +191,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                                 patchEnum(lightOffId, "switchState", SWITCH_DESCRIPTION,
                                                           ImmutableList.of("ON", "OFF")
                                                 ))),
-                        ImmutableMap.of("name", "secondLightOn",
-                                        "switchState", SwitchState.ON.name(),
+                        ImmutableMap.of("name", "secondLight",
+                                        "switchState", SwitchState.OFF.name(),
                                         "id", lightOnId.uuid().toString(),
                                         "type", "LIGHT",
                                         "operations",

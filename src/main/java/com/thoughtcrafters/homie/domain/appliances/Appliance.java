@@ -1,6 +1,7 @@
 package com.thoughtcrafters.homie.domain.appliances;
 
 import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateNotAvailable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
@@ -47,4 +48,6 @@ public abstract class Appliance {
     public <T> void updateProperty(String propertyName, T propertyValue) {
         throw new PropertyUpdateNotAvailable(id, propertyName, propertyValue.toString());
     }
+
+    public abstract Appliance copy();
 }

@@ -102,11 +102,10 @@ public abstract class AcceptanceTest {
         return response.getEntity(Map.class);
     }
 
-    public ApplianceId aLightHasBeenCreatedWith(String aName, SwitchState initialState)
+    public ApplianceId aLightHasBeenCreatedWith(String aName)
             throws JsonProcessingException {
         String requestEntity = jsonFrom(ImmutableMap.of(
                 "name", aName,
-                "initialState", initialState.name(),
                 "type", "LIGHT"));
 
         ClientResponse response = Client.create()
