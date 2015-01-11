@@ -39,6 +39,12 @@ public class AppliancesApplicationService {
         return applianceRepository.getAll();
     }
 
+    public void replaceProperty(ApplianceId applianceId, String path, String value) {
+        Appliance appliance = applianceRepository.getBy(applianceId);
+        appliance.updateProperty(path, value);
+        applianceRepository.save(appliance);
+    }
+
     private static class LightActionExecutor {
         private final LightAction lightAction;
         private ApplianceRepository applianceRepository;

@@ -10,6 +10,11 @@ import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.After;
 import org.junit.ClassRule;
@@ -18,6 +23,7 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.thoughtcrafters.homie.TestUtils.UUID_REGEX;
@@ -102,54 +108,24 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void turnsALightOnCorrectly() throws JsonProcessingException {
-        // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName");
-
-        // when
-        ClientResponse response = Client.create()
-                                        .resource(appliancesUri().path(id.uuid().toString()).path("on").build())
-                                        .post(ClientResponse.class);
-
-        // then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
-
-        assertThat(aLightResponseFor(id))
-                .containsEntry("switchState", SwitchState.ON.name());
-    }
-
-    @Test
-    public void turnsALightOffCorrectly() throws JsonProcessingException {
-        // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName");
-
-        // when
-        ClientResponse response = Client.create()
-                                        .resource(appliancesUri().path(id.uuid().toString()).path("off").build())
-                                        .post(ClientResponse.class);
-
-        // then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
-
-        assertThat(aLightResponseFor(id))
-                .containsEntry("switchState", SwitchState.OFF.name());
-    }
-
-    @Test
-    public void returns404WhenLightIsNotFoundWhenTryingToChangeTheSwitch() {
+    public void returns404WhenLightIsNotFoundWhenTryingToChangeTheSwitch() throws IOException {
         // given
         ApplianceId id = new ApplianceId(UUID.randomUUID());
 
+        ImmutableMap<String, Object> request = ImmutableMap.of("op", "replace",
+                                                               "path", "/switchState",
+                                                               "value", "ON");
+
         // when
-        ClientResponse response =
-                Client.create()
-                      .resource(appliancesUri().path(id.uuid().toString())
-                                               .path(SwitchState.OFF.name().toLowerCase()).build())
-                      .post(ClientResponse.class);
+        HttpPatch httpPatch = new HttpPatch(appliancesUri(id).build());
+        httpPatch.setEntity(new StringEntity(jsonFrom(request)));
+        httpPatch.addHeader("Content-Type", "application/json-patch+json");
+
+        CloseableHttpResponse response = HttpClients.createDefault().execute(httpPatch);
 
         // then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
-        assertThat(response.getEntity(String.class))
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND_404);
+        assertThat(EntityUtils.toString(response.getEntity()))
                 .isEqualToIgnoringCase(format("Light with id %s has not been found.", id.uuid()));
     }
 
@@ -165,6 +141,49 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // then
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat(response.getEntity(List.class)).isEmpty();
+    }
+
+    @Test
+    public void turnsTheLightOnWithAnUpdate() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName");
+
+        // when
+        CloseableHttpResponse response = aLightHasBeenTurnedTo(id, SwitchState.ON);
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
+        assertThat(aLightResponseFor(id))
+                .containsEntry("switchState", SwitchState.ON.name());
+    }
+
+    @Test
+    public void turnsTheLightOffWithAnUpdate() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName");
+        aLightHasBeenTurnedTo(id, SwitchState.ON);
+
+        // when
+        CloseableHttpResponse response = aLightHasBeenTurnedTo(id, SwitchState.OFF);
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
+        assertThat(aLightResponseFor(id))
+                .containsEntry("switchState", SwitchState.OFF.name());
+    }
+
+    private CloseableHttpResponse aLightHasBeenTurnedTo(ApplianceId id, SwitchState switchState) throws IOException {
+        ImmutableMap<String, Object> request = ImmutableMap.of("op", "replace",
+                                                               "path", "/switchState",
+                                                               "value", switchState.toString());
+
+        HttpPatch httpPatch = new HttpPatch(appliancesUri(id).build());
+        httpPatch.setEntity(new StringEntity(jsonFrom(request)));
+        httpPatch.addHeader("Content-Type", "application/json-patch+json");
+
+        CloseableHttpResponse response = HttpClients.createDefault().execute(httpPatch);
+        response.close();
+        return response;
     }
 
     @Test

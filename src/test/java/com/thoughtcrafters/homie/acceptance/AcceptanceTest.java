@@ -32,6 +32,12 @@ public abstract class AcceptanceTest {
                          .path(APPLIANCES_PATH);
     }
 
+    protected UriBuilder appliancesUri(ApplianceId applianceId) {
+        return UriBuilder.fromPath(format("http://localhost:%d", app().getLocalPort()))
+                         .path(APPLIANCES_PATH)
+                         .path(applianceId.uuid().toString());
+    }
+
     protected UriBuilder roomsUri() {
         return UriBuilder.fromPath(format("http://localhost:%d", app().getLocalPort()))
                          .path(ROOMS_PATH);

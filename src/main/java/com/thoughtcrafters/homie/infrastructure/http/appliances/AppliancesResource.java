@@ -3,6 +3,7 @@ package com.thoughtcrafters.homie.infrastructure.http.appliances;
 import com.thoughtcrafters.homie.application.AppliancesApplicationService;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
+import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.UUIDParam;
 
 import javax.validation.Valid;
@@ -40,18 +41,16 @@ public class AppliancesResource {
         return appliancesApplicationService.getApplianceWith(new ApplianceId(applianceId.get()));
     }
 
-    @POST
-    @Path("/{applianceId}/on")
-    public Response turnOnTheAppliance(@PathParam("applianceId") UUIDParam applianceId) {
-        appliancesApplicationService.turnOnTheLightWith(new ApplianceId(applianceId.get()));
+    @PATCH
+    @Path("/{applianceId}")
+    @Consumes("application/json-patch+json")
+    public Response patchAppliance(@PathParam("applianceId") UUIDParam applianceId,
+                                   @Valid ReplacePatchRequest replacePatchRequest) {
+        appliancesApplicationService.replaceProperty(new ApplianceId(applianceId.get()),
+                                                     replacePatchRequest.getPath(),
+                                                     replacePatchRequest.getValue());
         return Response.noContent().build();
-    }
 
-    @POST
-    @Path("/{applianceId}/off")
-    public Response turnOffTheAppliance(@PathParam("applianceId") UUIDParam applianceId) {
-        appliancesApplicationService.turnOffTheLightWith(new ApplianceId(applianceId.get()));
-        return Response.noContent().build();
     }
 
 }

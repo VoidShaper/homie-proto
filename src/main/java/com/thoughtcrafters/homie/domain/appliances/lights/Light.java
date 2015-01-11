@@ -7,6 +7,7 @@ import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyType;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdate;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateNotAvailable;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.behaviours.Switchable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class Light extends Appliance implements  Switchable {
+public class Light extends Appliance implements Switchable {
 
     private SwitchState switchState;
 
@@ -52,14 +53,14 @@ public class Light extends Appliance implements  Switchable {
 
     @Override
     public void turnOn() {
-        if(switchState == SwitchState.OFF) {
+        if (switchState == SwitchState.OFF) {
             switchState = SwitchState.ON;
         }
     }
 
     @Override
     public void turnOff() {
-        if(switchState == SwitchState.ON) {
+        if (switchState == SwitchState.ON) {
             switchState = SwitchState.OFF;
         }
     }
@@ -72,6 +73,17 @@ public class Light extends Appliance implements  Switchable {
     @Override
     public Appliance copy() {
         return new Light(id, name, roomId, switchState);
+    }
+
+    @Override
+    public <T> void updateProperty(String propertyName, T propertyValue) {
+        if (propertyName.replaceAll("/", "").equals("switchState") &&
+                (propertyValue.toString().equals("ON"))
+                || propertyValue.toString().equals("OFF")) {
+            switchState = SwitchState.valueOf(propertyValue.toString());
+            return;
+        }
+        throw new PropertyUpdateNotAvailable(id, propertyName, propertyValue.toString());
     }
 
     @Override
