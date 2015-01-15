@@ -1,24 +1,20 @@
 package com.thoughtcrafters.homie.domain.appliances.lights;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationDefinition;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyType;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateDefinition;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateNotAvailableException;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
-import com.thoughtcrafters.homie.domain.behaviours.Switchable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-public class Light extends Appliance implements Switchable {
+public class Light extends Appliance {
 
     private SwitchState switchState;
 
@@ -58,21 +54,6 @@ public class Light extends Appliance implements Switchable {
         return ApplianceType.LIGHT;
     }
 
-    @Override
-    public void turnOn() {
-        if (switchState == SwitchState.OFF) {
-            switchState = SwitchState.ON;
-        }
-    }
-
-    @Override
-    public void turnOff() {
-        if (switchState == SwitchState.ON) {
-            switchState = SwitchState.OFF;
-        }
-    }
-
-    @Override
     public SwitchState state() {
         return this.switchState;
     }

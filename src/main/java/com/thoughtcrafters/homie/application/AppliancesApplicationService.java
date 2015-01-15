@@ -2,7 +2,6 @@ package com.thoughtcrafters.homie.application;
 
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
-import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceRepository;
 import com.thoughtcrafters.homie.domain.appliances.operations.OperationExecution;
