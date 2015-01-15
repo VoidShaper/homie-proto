@@ -1,19 +1,20 @@
 package com.thoughtcrafters.homie.domain.appliances.lights;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
+import com.thoughtcrafters.homie.domain.appliances.operations.OperationDefinition;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyType;
-import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdate;
-import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateNotAvailable;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateDefinition;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateNotAvailableException;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.behaviours.Switchable;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -31,6 +32,21 @@ public class Light extends Appliance implements Switchable {
                  SwitchState switchState) {
         super(id, name, roomId);
         this.switchState = switchState;
+        operations.add(new Operation(
+                new PropertyUpdateDefinition(id,
+                                             "turn on or off",
+                                             "switchState",
+                                             PropertyType.ENUM,
+                                             Optional.of(newArrayList("ON", "OFF"))),
+                execution -> {
+                    if (execution.propertyName().equals("switchState") &&
+                            (execution.value().equals("ON"))
+                            || execution.value().equals("OFF")) {
+                        this.switchState = SwitchState.valueOf(execution.value());
+                        return;
+                    }
+                    throw new PropertyUpdateNotAvailableException(id, execution.propertyName(), execution.value());
+                }));
     }
 
     public SwitchState switchState() {
@@ -40,15 +56,6 @@ public class Light extends Appliance implements Switchable {
     @Override
     public ApplianceType type() {
         return ApplianceType.LIGHT;
-    }
-
-    @Override
-    public Set<Operation> operations() {
-        return ImmutableSet.of(new PropertyUpdate(id,
-                                                  "turn on or off",
-                                                  "switchState",
-                                                  PropertyType.ENUM,
-                                                  Optional.of(newArrayList("ON", "OFF"))));
     }
 
     @Override
@@ -73,17 +80,6 @@ public class Light extends Appliance implements Switchable {
     @Override
     public Appliance copy() {
         return new Light(id, name, roomId, switchState);
-    }
-
-    @Override
-    public <T> void updateProperty(String propertyName, T propertyValue) {
-        if (propertyName.replaceAll("/", "").equals("switchState") &&
-                (propertyValue.toString().equals("ON"))
-                || propertyValue.toString().equals("OFF")) {
-            switchState = SwitchState.valueOf(propertyValue.toString());
-            return;
-        }
-        throw new PropertyUpdateNotAvailable(id, propertyName, propertyValue.toString());
     }
 
     @Override

@@ -45,10 +45,9 @@ public class AppliancesResource {
     @Path("/{applianceId}")
     @Consumes("application/json-patch+json")
     public Response patchAppliance(@PathParam("applianceId") UUIDParam applianceId,
-                                   @Valid ReplacePatchRequest replacePatchRequest) {
-        appliancesApplicationService.replaceProperty(new ApplianceId(applianceId.get()),
-                                                     replacePatchRequest.getPath(),
-                                                     replacePatchRequest.getValue());
+                                   @Valid PatchResourceRequest patchResourceRequest) {
+        appliancesApplicationService.performOperation(new ApplianceId(applianceId.get()),
+                                                      patchResourceRequest.toOperationExecution());
         return Response.noContent().build();
 
     }

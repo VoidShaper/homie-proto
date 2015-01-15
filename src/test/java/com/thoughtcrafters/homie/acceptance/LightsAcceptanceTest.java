@@ -70,7 +70,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(appliancesUri().path(id.uuid().toString()).build())
+                                        .resource(appliancesUri(id).build())
                                         .get(ClientResponse.class);
 
         // then
@@ -97,7 +97,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
 
         // when
         ClientResponse response = Client.create()
-                                        .resource(appliancesUri().path(id.uuid().toString()).build())
+                                        .resource(appliancesUri(id).build())
                                         .get(ClientResponse.class);
 
         // then

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.thoughtcrafters.homie.application.AppliancesApplicationService;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
-import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdate;
+import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateDefinition;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.AppliancesResource;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateSerializer;
@@ -40,7 +40,7 @@ public class HomieApplication extends Application<HomieConfiguration> {
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule homieModule = new SimpleModule("HomieModule");
         homieModule.addSerializer(Light.class, new LightSerializer());
-        homieModule.addSerializer(PropertyUpdate.class, new PropertyUpdateSerializer());
+        homieModule.addSerializer(PropertyUpdateDefinition.class, new PropertyUpdateSerializer());
         environment.getObjectMapper().registerModule(homieModule);
 
         environment.jersey().register(new LightNotFoundExceptionMapper());

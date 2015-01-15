@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
+import com.thoughtcrafters.homie.domain.appliances.operations.OperationDefinition;
 
 import java.io.IOException;
 
@@ -29,8 +30,8 @@ public class LightSerializer extends JsonSerializer<Light> {
 
         jsonGenerator.writeArrayFieldStart("operations");
 
-        for(Operation operation : light.operations()) {
-            jsonGenerator.writeObject(operation);
+        for(OperationDefinition operationDefinition : light.definedOperations()) {
+            jsonGenerator.writeObject(operationDefinition);
         }
 
         jsonGenerator.writeEndArray();
