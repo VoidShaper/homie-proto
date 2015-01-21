@@ -4,6 +4,8 @@ import com.thoughtcrafters.homie.domain.appliances.operations.OperationExecution
 import com.thoughtcrafters.homie.domain.appliances.operations.OperationType;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import java.io.IOException;
+
 public class PatchResourceRequest {
     @NotEmpty
     private String op;

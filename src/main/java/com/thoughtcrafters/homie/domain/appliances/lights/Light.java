@@ -36,12 +36,12 @@ public class Light extends Appliance {
                                              Optional.of(newArrayList("ON", "OFF"))),
                 execution -> {
                     if (execution.propertyName().equals("switchState") &&
-                            (execution.value().equals("ON"))
-                            || execution.value().equals("OFF")) {
-                        this.switchState = SwitchState.valueOf(execution.value());
+                            (execution.valueString().equals("ON"))
+                            || execution.valueString().equals("OFF")) {
+                        this.switchState = SwitchState.valueOf(execution.valueString());
                         return;
                     }
-                    throw new PropertyUpdateNotAvailableException(id, execution.propertyName(), execution.value());
+                    throw new PropertyUpdateNotAvailableException(id, execution.propertyName(), execution.valueString());
                 }));
     }
 

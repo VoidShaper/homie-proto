@@ -1,17 +1,25 @@
 package com.thoughtcrafters.homie.infrastructure.http.rooms;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.FluentIterable;
+import com.thoughtcrafters.homie.application.RoomTask;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Room;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
+import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.UUIDParam;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.util.List;
 
 @Path("/rooms")
@@ -20,9 +28,12 @@ import java.util.List;
 public class RoomsResource {
 
     private RoomsApplicationService roomsApplicationService;
+    private ObjectMapper objectMapper;
 
-    public RoomsResource(RoomsApplicationService roomsApplicationService) {
+    public RoomsResource(RoomsApplicationService roomsApplicationService,
+                         ObjectMapper objectMapper) {
         this.roomsApplicationService = roomsApplicationService;
+        this.objectMapper = objectMapper;
     }
 
     @GET
@@ -46,23 +57,12 @@ public class RoomsResource {
         return RoomResponse.withoutIdFrom(room);
     }
 
-    @PUT
-    @Path("/{roomId}/appliances/{applianceId}")
-    public Response addApplianceToRoom(@PathParam("roomId") UUIDParam roomId,
-                                       @PathParam("applianceId") UUIDParam applianceId,
-                                       @Valid PointBody pointBody) {
-        roomsApplicationService.addApplianceToRoom(new ApplianceId(applianceId.get()),
-                                                   new RoomId(roomId.get()),
-                                                   pointBody.asPoint());
-        return Response.noContent().build();
-    }
-
-    @DELETE
-    @Path("/{roomId}/appliances/{applianceId}")
-    public Response removeApplianceFromRoom(@PathParam("roomId") UUIDParam roomId,
-                                            @PathParam("applianceId") UUIDParam applianceId) {
-        roomsApplicationService.removeApplianceFromRoom(new ApplianceId(applianceId.get()),
-                                                        new RoomId(roomId.get()));
+    @PATCH
+    @Path("/{roomId}")
+    @Consumes("application/json-patch+json")
+    public Response patchRoom(@PathParam("roomId") UUIDParam roomId,
+                              @Valid RoomTask roomTask) throws IOException {
+        roomTask.performTaskOn(new RoomId(roomId.get()));
         return Response.noContent().build();
     }
 }

@@ -1,29 +1,29 @@
 package com.thoughtcrafters.homie.acceptance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.thoughtcrafters.homie.HomieApplication;
 import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
-import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.rooms.Point;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
-
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.thoughtcrafters.homie.TestUtils.UUID_REGEX;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,25 +82,16 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void addsAnApplianceToTheRoom() throws JsonProcessingException {
+    public void addsAnApplianceToTheRoomWithAPatch() throws IOException {
         // given
         ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
 
-        String request = jsonFrom(ImmutableMap.of("x", num(5),
-                                                  "y", num(6)));
-
         // when
-        ClientResponse response = Client.create()
-                                        .resource(roomsUri().path(id.uuid().toString())
-                                                            .path("appliances")
-                                                            .path(lightId.uuid().toString())
-                                                            .build())
-                                        .entity(request, MediaType.APPLICATION_JSON_TYPE)
-                                        .put(ClientResponse.class);
+        CloseableHttpResponse response = anApplianceHasBeenAddedToTheRoom(id, lightId, new Point(5, 6));
 
         // then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aRoomResponseFor(id))
                 .containsEntry("appliances", ImmutableMap.of(lightId.uuid().toString(),
@@ -112,23 +103,25 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void removesAnApplianceFromTheRoom() throws JsonProcessingException {
+    public void removesAnApplianceFromTheRoom() throws IOException {
         // given
         ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
         anApplianceHasBeenAddedToTheRoom(id, lightId, new Point(8, 12));
 
+        String request = jsonFrom(ImmutableMap.of("op", "remove",
+                                                  "path", "/appliances",
+                                                  "value", lightId.uuid().toString()));
+
         // when
-        ClientResponse response =
-                Client.create()
-                      .resource(roomsUri().path(id.uuid().toString())
-                                          .path("appliances")
-                                          .path(lightId.uuid().toString())
-                                          .build())
-                      .delete(ClientResponse.class);
+        HttpPatch httpPatch = new HttpPatch(roomsUri(id).build());
+        httpPatch.setEntity(new StringEntity(request));
+        httpPatch.addHeader("Content-Type", "application/json-patch+json");
+        CloseableHttpResponse response = HttpClients.createDefault().execute(httpPatch);
 
         // then
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NO_CONTENT_204);
+        assertThat(response.getStatusLine().getStatusCode())
+                .isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aRoomResponseFor(id))
                 .containsEntry("appliances", ImmutableMap.of());

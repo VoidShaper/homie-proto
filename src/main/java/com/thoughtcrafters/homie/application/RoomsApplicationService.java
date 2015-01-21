@@ -29,9 +29,7 @@ public class RoomsApplicationService {
     public List<Room> getAllRooms() {
         return roomsRepository.getAll();
     }
-
     // TODO implement error handling when light is already in another room
-    // TODO error handling when either room or light is not found
     public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId, Point point) {
         Room room = roomsRepository.getBy(roomId);
         Appliance appliance = applianceRepository.getBy(applianceId);

@@ -19,7 +19,7 @@ public class OperationExecution {
         return propertyName;
     }
 
-    public String value() {
+    public String valueString() {
         return operationValue;
     }
 }

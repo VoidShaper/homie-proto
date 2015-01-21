@@ -3,14 +3,16 @@ package com.thoughtcrafters.homie;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.thoughtcrafters.homie.application.AppliancesApplicationService;
+import com.thoughtcrafters.homie.application.RoomTask;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateDefinition;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.AppliancesResource;
+import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
-import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExceptionMapper;
+import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomTaskDeserializer;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapApplianceRepository;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
 import io.dropwizard.Application;
@@ -37,18 +39,24 @@ public class HomieApplication extends Application<HomieConfiguration> {
 
     @Override
     public void run(HomieConfiguration configuration, Environment environment) throws Exception {
+        roomsRepository = new HashMapRoomsRepository();
+        applianceRepository = new HashMapApplianceRepository();
+        RoomsApplicationService roomsApplicationService = new RoomsApplicationService(roomsRepository,
+                                                                                      applianceRepository);
+
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule homieModule = new SimpleModule("HomieModule");
         homieModule.addSerializer(Light.class, new LightSerializer());
         homieModule.addSerializer(PropertyUpdateDefinition.class, new PropertyUpdateSerializer());
+        homieModule.addDeserializer(RoomTask.class, new RoomTaskDeserializer(roomsApplicationService));
         environment.getObjectMapper().registerModule(homieModule);
 
         environment.jersey().register(new LightNotFoundExceptionMapper());
-        applianceRepository = new HashMapApplianceRepository();
-        environment.jersey().register(new AppliancesResource(new AppliancesApplicationService(applianceRepository)));
-        roomsRepository = new HashMapRoomsRepository();
+        environment.jersey().register(new AppliancesResource(new AppliancesApplicationService(
+                applianceRepository)));
         environment.jersey()
-                   .register(new RoomsResource(new RoomsApplicationService(roomsRepository, applianceRepository)));
+                   .register(new RoomsResource(roomsApplicationService,
+                                               environment.getObjectMapper()));
 
     }
 

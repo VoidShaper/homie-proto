@@ -10,7 +10,7 @@ public class PointBody {
     @NotNull
     private Double y;
 
-    private PointBody(Double x, Double y) {
+    public PointBody(Double x, Double y) {
         this.x = x;
         this.y = y;
     }
