@@ -1,11 +1,9 @@
 package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
-import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
 import com.thoughtcrafters.homie.domain.appliances.operations.OperationDefinition;
 
 import java.io.IOException;
@@ -16,7 +14,7 @@ public class LightSerializer extends JsonSerializer<Light> {
     public void serialize(Light light,
                           JsonGenerator jsonGenerator,
                           SerializerProvider serializerProvider)
-            throws IOException, JsonProcessingException {
+            throws IOException {
         jsonGenerator.writeStartObject();
 
         jsonGenerator.writeStringField("id", light.id().uuid().toString());

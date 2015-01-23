@@ -231,7 +231,9 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                                  .toString())
                            .put("description", description)
                            .put("method", "PATCH")
-                           .put("property", field)
+                           .put("op", "replace")
+                           .put("contentType", "application/json-patch+json")
+                           .put("property", "/" + field)
                            .put("propertyType", "ENUM")
                            .put("enumValues", enumValues)
                            .build();

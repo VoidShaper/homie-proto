@@ -24,7 +24,9 @@ public class PropertyUpdateSerializer extends JsonSerializer<PropertyUpdateDefin
         jsonGenerator.writeStringField("description", propertyUpdateDefinition.description());
         jsonGenerator.writeStringField("uri", uri.toString());
         jsonGenerator.writeObjectField("method", "PATCH");
-        jsonGenerator.writeStringField("property", propertyUpdateDefinition.property());
+        jsonGenerator.writeObjectField("op", "replace");
+        jsonGenerator.writeObjectField("contentType", "application/json-patch+json");
+        jsonGenerator.writeStringField("property", "/" + propertyUpdateDefinition.property());
         jsonGenerator.writeStringField("propertyType", propertyUpdateDefinition.propertyType().toString());
 
         if(propertyUpdateDefinition.enumValues().isPresent()) {

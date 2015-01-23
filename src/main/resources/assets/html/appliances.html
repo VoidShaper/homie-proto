@@ -5,14 +5,46 @@
             <tr>
                 <th class="col-md-3">Appliance Id</th>
                 <th class="col-md-2">Name</th>
-                <th class="col-md-2">Type</th>
-                <th class="col-md-2">Switch State</th>
+                <th class="col-md-1">Type</th>
+                <th class="col-md-1">Switch State</th>
+                <th class="col-md-4">Operations</th>
             </tr>
             <tr ng-repeat="appliance in appliances">
                 <td>{{appliance.id}}</td>
                 <td>{{appliance.name}}</td>
                 <td>{{appliance.type}}</td>
                 <td>{{appliance.switchState}}</td>
+                <td>
+                    <ul class="list-group">
+                        <li ng-repeat="operation in appliance.operations" class="list-group-item">
+                            <div ng-if="operation.method=='PATCH'">
+
+                                <div><strong>operation</strong>: update </div>
+                                <div><strong>property</strong>: {{ operation.property }}</div>
+                                <div><strong>description</strong>: {{ operation.description }}</div>
+
+                                <div ng-if="operation.enumValues.length > 3">
+                                    <select ng-if="operation.propertyType=='ENUM'"
+                                            ng-options="enumValue for enumValue in operation.enumValues"
+                                            ng-model="operation.chosenValue">
+
+                                    </select>
+                                    <button class="btn btn-link">perform</button>
+                                </div>
+
+                                <div ng-if="operation.enumValues.length <= 3">
+                                    <button class="btn btn-default"
+                                            ng-model="operation.chosenValue"
+                                            ng-repeat="enumValue in operation.enumValues"
+                                            btn-radio="enumValue"
+                                            ng-click="setOperationValue(operation, enumValue); perform(operation)">
+                                        {{ enumValue }}
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </td>
             </tr>
         </table>
     </div>
@@ -33,12 +65,6 @@
                     <select ng-init="appliance.type = appliance.type || applianceTypes[0]"
                             ng-options="type for type in applianceTypes" id="applianceType"
                             type="text" ng-model="appliance.type" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                    <label for="initialState">Initial State</label>
-                    <select ng-init="appliance.initialState = appliance.initialState || initialStates[0]"
-                            ng-options="state for state in initialStates" id="initialState"
-                            type="text" ng-model="appliance.initialState" class="form-control"></select>
                 </div>
                 <button class="btn btn-primary" ng-click="newAppliance()">Create Appliance</button>
             </form>
