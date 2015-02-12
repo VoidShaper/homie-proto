@@ -6,14 +6,21 @@
                 <th class="col-md-3">Appliance Id</th>
                 <th class="col-md-2">Name</th>
                 <th class="col-md-1">Type</th>
-                <th class="col-md-1">Switch State</th>
+                <th class="col-md-3">Properties</th>
                 <th class="col-md-4">Operations</th>
             </tr>
             <tr ng-repeat="appliance in appliances">
                 <td>{{appliance.id}}</td>
                 <td>{{appliance.name}}</td>
                 <td>{{appliance.type}}</td>
-                <td>{{appliance.switchState}}</td>
+                <td>
+                    <ul class="list-group">
+                        <li ng-repeat="(property, value) in otherFieldsFrom(appliance)"
+                            class="list-group-item">
+                            {{ property }}: {{ value }}
+                        </li>
+                    </ul>
+                </td>
                 <td>
                     <ul class="list-group">
                         <li ng-repeat="operation in appliance.operations" class="list-group-item">

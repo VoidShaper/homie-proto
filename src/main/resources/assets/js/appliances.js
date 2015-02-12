@@ -12,6 +12,7 @@ angular.module('homieApp')
         };
         $scope.getAllAppliances();
 
+        // TODO get these from server
         $scope.applianceTypes = ['LIGHT'];
         $scope.initialStates = ['ON', 'OFF'];
 
@@ -34,8 +35,22 @@ angular.module('homieApp')
         };
 
 
-        $scope.setOperationValue = function(operation, value) {
+        $scope.setOperationValue = function (operation, value) {
             operation.value = value;
+        };
+
+        $scope.otherFieldsFrom = function (appliance) {
+            var otherFields = {};
+            for (var property in appliance) {
+                if (appliance.hasOwnProperty(property)
+                && property != 'operations'
+                && property != 'id'
+                && property != 'type'
+                && property != 'name') {
+                    otherFields[property] = appliance[property];
+                }
+            }
+            return otherFields;
         };
 
         $scope.perform = function (operation) {

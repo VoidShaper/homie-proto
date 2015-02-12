@@ -1,7 +1,6 @@
 package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyUpdateDefinition;
@@ -15,7 +14,7 @@ public class PropertyUpdateSerializer extends JsonSerializer<PropertyUpdateDefin
     public void serialize(PropertyUpdateDefinition propertyUpdateDefinition,
                           JsonGenerator jsonGenerator,
                           SerializerProvider serializerProvider)
-            throws IOException, JsonProcessingException {
+            throws IOException {
 
         URI uri = UriBuilder.fromPath("/appliances/{applianceId}")
                             .build(propertyUpdateDefinition.applianceId().uuid().toString());
