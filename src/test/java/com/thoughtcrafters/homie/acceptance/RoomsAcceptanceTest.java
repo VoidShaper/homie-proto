@@ -44,7 +44,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         // given
         String requestEntity = jsonFrom(
                 ImmutableMap.<String, Object>of("name", "roomName",
-                                                "shape", rectangle20x20()));
+                                   "shape", rectangle20x20()));
 
         // when
         ClientResponse response = Client.create()

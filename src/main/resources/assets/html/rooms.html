@@ -8,7 +8,7 @@
                 <th class="col-md-5">Shape</th>
             </tr>
             <tr ng-repeat="room in rooms">
-                <td>{{room.id}}</td>
+                <td><a href="#/rooms/{{room.id}}">{{room.id}}</a></td>
                 <td>{{room.name}}</td>
                 <td><canvas width="100" height="100" roomshape></canvas></td>
             </tr>
