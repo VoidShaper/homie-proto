@@ -1,7 +1,46 @@
 <div ng-if="room">
     <h2>Room: {{room.name}}</h2>
-    <div style="color: gray">{{room.id}}</div>
+
     <div>
-        <canvas width="400" height="400" roomshape></canvas>
+        <roomshape width="400" height="400" room="room" fullview newplacement="appliancePlacement">
+
+        </roomshape>
     </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Add appliance</div>
+
+        <alert ng-repeat="alert in alerts"
+               type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}
+        </alert>
+        <form novalidate>
+            <div ng-if="!appliancePlacement.started">
+                <button class="btn btn-primary" ng-click="startPlacing()">Add appliance</button>
+            </div>
+            <div ng-if="appliancePlacement.started">
+                <div class="form-group">
+                    <label for="placedAppliance">Appliance</label>
+                    <select ng-options="appliance.id as appliance.name for appliance in appliances"
+                            ng-model="appliancePlacement.data.applianceId" class="form-control"
+                            id="placedAppliance">
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="x">x</label>
+                    <input ng-model="appliancePlacement.data.point.x" class="form-control"
+                           type="number" id="x" min="0" max="100"/>
+
+                    <label for="y">y</label>
+                    <input ng-model="appliancePlacement.data.point.y" class="form-control"
+                           type="number" id="y" min="0" max="100"/>
+                    <button class="btn btn-primary" ng-click="placeInRoom()">Place in Room</button>
+                    <button class="btn btn-danger" ng-click="cancelPlacing()">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 </div>

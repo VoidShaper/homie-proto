@@ -77,8 +77,8 @@ public abstract class AcceptanceTest {
             throws IOException {
         ImmutableMap<String, Object> value =
                 ImmutableMap.<String, Object>of("applianceId", applianceId.uuid().toString(),
-                                                "x", point.x(),
-                                                "y", point.y());
+                                                "point", ImmutableMap.of("x", point.x(),
+                                                                         "y", point.y()));
 
         String request = jsonFrom(ImmutableMap.of("op", "add",
                                                   "path", "/appliances",

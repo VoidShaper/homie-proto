@@ -2,6 +2,7 @@ package com.thoughtcrafters.homie.infrastructure.http.rooms;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Point;
 import com.thoughtcrafters.homie.domain.rooms.Room;
@@ -14,10 +15,10 @@ import java.util.stream.Collectors;
 public class RoomResponse {
     private UUID id;
     private String name;
-    private Map<UUID, PointBody> appliances;
+    private Map<UUID, Map<String, PointBody>> appliances;
     private List<PointBody> shape;
 
-    private RoomResponse(UUID id, String name, Map<UUID, PointBody> appliances, List<PointBody> shape) {
+    private RoomResponse(UUID id, String name, Map<UUID, Map<String, PointBody>> appliances, List<PointBody> shape) {
         this.id = id;
         this.name = name;
         this.appliances = appliances;
@@ -32,7 +33,7 @@ public class RoomResponse {
         return name;
     }
 
-    public Map<UUID, PointBody> getAppliances() {
+    public Map<UUID, Map<String, PointBody>> getAppliances() {
         return appliances;
     }
 
@@ -56,10 +57,10 @@ public class RoomResponse {
                 pointBodyFrom(room));
     }
 
-    private static Map<UUID, PointBody> map(Map<ApplianceId, Point> appliances1) {
+    private static Map<UUID, Map<String, PointBody>> map(Map<ApplianceId, Point> appliances1) {
         return appliances1.entrySet().stream().collect(
                 Collectors.toMap(e -> e.getKey().uuid(),
-                                 e -> PointBody.from(e.getValue())));
+                                 e -> ImmutableMap.of("point", PointBody.from(e.getValue()))));
     }
 
     private static ImmutableList<PointBody> pointBodyFrom(Room room) {

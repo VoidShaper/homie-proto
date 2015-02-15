@@ -39,8 +39,9 @@ public class RoomTaskDeserializer extends StdDeserializer<RoomTask> {
                 if (op.equals("add")) {
                     JsonNode value = root.get("value");
                     UUIDParam applianceId = new UUIDParam(value.get("applianceId").textValue());
-                    double x = value.get("x").asDouble();
-                    double y = value.get("y").asDouble();
+                    JsonNode point = value.get("point");
+                    double x = point.get("x").asDouble();
+                    double y = point.get("y").asDouble();
                     return new PlaceApplianceInTheRoomTask(roomsApplicationService,
                                                            new ApplianceId(applianceId.get()),
                                                            new Point(x, y));

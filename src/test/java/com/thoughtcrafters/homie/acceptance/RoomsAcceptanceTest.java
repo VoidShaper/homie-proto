@@ -44,7 +44,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         // given
         String requestEntity = jsonFrom(
                 ImmutableMap.<String, Object>of("name", "roomName",
-                                   "shape", rectangle20x20()));
+                                                "shape", rectangle20x20()));
 
         // when
         ClientResponse response = Client.create()
@@ -94,9 +94,11 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aRoomResponseFor(id))
-                .containsEntry("appliances", ImmutableMap.of(lightId.uuid().toString(),
-                                                             ImmutableMap.of("x", num(5),
-                                                                             "y", num(6))));
+                .containsEntry("appliances",
+                               ImmutableMap.of(lightId.uuid().toString(),
+                                               ImmutableMap.of("point",
+                                                               ImmutableMap.of("x", num(5),
+                                                                               "y", num(6)))));
 
         assertThat(aLightResponseFor(lightId))
                 .containsEntry("roomId", id.uuid().toString());

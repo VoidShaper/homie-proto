@@ -16,17 +16,55 @@ angular.module('homieApp')
     })
     .directive("roomshape", function () {
         return {
-            restrict: "A",
-            link: function (scope, element) {
-
-                var shape = scope.room.shape;
-                var canvas = element[0];
+            restrict: "E",
+            scope:  {
+                width: "@",
+                height: "@",
+                room: "=",
+                newplacement: "=?"
+            },
+            template: "<canvas></canvas>",
+            link: function (scope, element, attrs) {
+                scope.fullview = 'fullview' in attrs;
+                scope.newplacement = scope.newplacement || null;
+                var room = scope.room;
+                var canvas = element.find("canvas")[0];
+                canvas.width = scope.width;
+                canvas.height = scope.height;
                 var ctx = canvas.getContext('2d');
                 var scale = 1.0 * Math.min(canvas.width, canvas.height) / 100;
 
-                draw(ctx, shape);
+                draw(ctx, room, scope.newplacement);
 
-                function draw(ctx, shape) {
+                function draw(ctx, room, newplacement) {
+                    drawShape(ctx, room.shape);
+                    if(newplacement && newplacement.started) {
+                        drawAppliance(ctx, newplacement.data.applianceId, newplacement.data.point, 'gray');
+                    }
+                    if(scope.fullview) {
+                        drawAppliances(ctx, room.appliances);
+                    }
+                };
+
+                function drawAppliance(ctx, applianceId, point, fillStyle) {
+                    ctx.beginPath();
+                    ctx.arc(point.x * scale,
+                        point.y * scale,
+                        1 * scale,
+                        0,
+                        2 * Math.PI,
+                        false);
+                    ctx.fillStyle = fillStyle;
+                    ctx.fill();
+                }
+
+                function drawAppliances(ctx, appliances) {
+                    angular.forEach(appliances, function(placement, applianceId) {
+                        drawAppliance(ctx, applianceId, placement.point, 'black');
+                    });
+                };
+
+                function drawShape(ctx, shape) {
                     ctx.lineWidth = "1";
                     ctx.strokeStyle = '#000';
                     ctx.beginPath();
@@ -39,28 +77,18 @@ angular.module('homieApp')
 
                     ctx.closePath();
                     ctx.stroke();
-                }
-
-                function drawAppliances(ctx, appliances) {
-                    for (var applianceId in appliances) {
-                        if (appliances.hasOwnProperty(applianceId)) {
-                            ctx.beginPath();
-                            ctx.arc(appliances[applianceId].x * scale,
-                                appliances[applianceId].y * scale,
-                                3 * scale,
-                                0,
-                                2 * Math.PI,
-                                false);
-                            ctx.fillStyle = 'green';
-                            ctx.fill();
-                        }
-                    }
                 };
 
                 scope.$watch('room', function (newRoom) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    draw(ctx, newRoom.shape);
+                    draw(ctx, newRoom, scope.newplacement);
                 }, true);
+                if(scope.newplacement) {
+                    scope.$watch('newplacement', function (newplacement) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        draw(ctx, scope.room, newplacement);
+                    }, true);
+                }
             }
         };
     })
