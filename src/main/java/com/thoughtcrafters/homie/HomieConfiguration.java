@@ -13,19 +13,19 @@ public class HomieConfiguration extends Configuration {
     @JsonProperty
     private String applicationVersion = "v0.1";
 
-    public String getApplicationName() {
+    @NotEmpty
+    @JsonProperty
+    private String dbPath = "homie.db";
+
+    public String applicationName() {
         return applicationName;
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getApplicationVersion() {
+    public String applicationVersion() {
         return applicationVersion;
     }
 
-    public void setApplicationVersion(String applicationVersion) {
-        this.applicationVersion = applicationVersion;
+    public String dbPath() {
+        return dbPath;
     }
 }

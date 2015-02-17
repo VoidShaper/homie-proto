@@ -31,3 +31,6 @@ target/
 
 # Dropwizard
 dependency-reduced-pom.xml
+
+# Homie
+homie.db

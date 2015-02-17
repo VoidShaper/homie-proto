@@ -11,14 +11,17 @@ import com.thoughtcrafters.homie.infrastructure.http.appliances.AppliancesResour
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateSerializer;
-import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomTaskDeserializer;
+import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapApplianceRepository;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
+import com.thoughtcrafters.homie.infrastructure.persistence.sqlite.SqliteConnectionFactory;
+import com.thoughtcrafters.homie.infrastructure.persistence.sqlite.SqliteDbRebuildCommand;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +38,18 @@ public class HomieApplication extends Application<HomieConfiguration> {
         bootstrap.addBundle(new AssetsBundle("/assets/fonts", "/fonts", null, "fonts"));
         bootstrap.addBundle(new AssetsBundle("/assets/html", "/html", null, "html"));
         bootstrap.addBundle(new AssetsBundle("/assets/html/index.html", "/ui", null, "ui"));
+
+        bootstrap.addCommand(new SqliteDbRebuildCommand());
     }
 
     @Override
     public void run(HomieConfiguration configuration, Environment environment) throws Exception {
+        DBI dbi = SqliteConnectionFactory.jdbiFrom(configuration.dbPath());
+
         roomsRepository = new HashMapRoomsRepository();
         applianceRepository = new HashMapApplianceRepository();
         RoomsApplicationService roomsApplicationService = new RoomsApplicationService(roomsRepository,
                                                                                       applianceRepository);
-
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule homieModule = new SimpleModule("HomieModule");
         homieModule.addSerializer(Light.class, new LightSerializer());
@@ -57,8 +63,8 @@ public class HomieApplication extends Application<HomieConfiguration> {
         environment.jersey()
                    .register(new RoomsResource(roomsApplicationService,
                                                environment.getObjectMapper()));
-
     }
+
 
     public static void main(String[] args) throws Exception {
         new HomieApplication().run(args);
