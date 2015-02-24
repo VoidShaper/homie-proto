@@ -9,4 +9,8 @@ public class RoomNotFoundException extends RuntimeException {
         super(format("Room with id %s not found.", roomId));
         this.roomId = roomId;
     }
+
+    public RoomId roomId() {
+        return this.roomId;
+    }
 }

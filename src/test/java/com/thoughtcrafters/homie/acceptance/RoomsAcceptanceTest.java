@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.thoughtcrafters.homie.TestUtils.UUID_REGEX;
 import static java.lang.String.format;
@@ -172,6 +173,24 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                                         "appliances", ImmutableMap.of(),
                                         "id", id2.uuid().toString(),
                                         "shape", polygon5p()));
+    }
+
+    @Test
+    public void returns404WhenLightIsNotFound() {
+        // given
+        RoomId roomId = new RoomId(UUID.randomUUID());
+
+        // when
+        ClientResponse response = Client.create()
+                                        .resource(roomsUri(roomId).build())
+                                        .get(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
+
+        assertThat(response.getEntity(String.class))
+                .isEqualToIgnoringCase(format("Room with id %s has not been found.",
+                                              roomId.uuid()));
     }
 
     @Override

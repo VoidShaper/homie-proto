@@ -13,6 +13,7 @@ import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExc
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.NoMatchingOperationForExecutionExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateSerializer;
+import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomTaskDeserializer;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
 import com.thoughtcrafters.homie.infrastructure.persistence.HashMapRoomsRepository;
@@ -59,6 +60,7 @@ public class HomieApplication extends Application<HomieConfiguration> {
         homieModule.addDeserializer(RoomTask.class, new RoomTaskDeserializer(roomsApplicationService));
         environment.getObjectMapper().registerModule(homieModule);
 
+        environment.jersey().register(new RoomNotFoundExceptionMapper());
         environment.jersey().register(new LightNotFoundExceptionMapper());
         environment.jersey().register(new NoMatchingOperationForExecutionExceptionMapper());
         environment.jersey().register(new ApplianceTypeNotSupportedExceptionMapper());
