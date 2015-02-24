@@ -18,6 +18,6 @@ public class LightNotFoundExceptionMapper implements ExceptionMapper<ApplianceNo
         logger.warn(e.getMessage());
         return Response
                 .status(Response.Status.NOT_FOUND)
-                .entity(format("Light with id %s has not been found.", e.appliance().uuid())).build();
+                .entity(format("Appliance with id %s has not been found.", e.appliance().uuid())).build();
     }
 }

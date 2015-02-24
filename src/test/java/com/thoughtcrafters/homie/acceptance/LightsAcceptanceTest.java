@@ -121,7 +121,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND_404);
 
         assertThat(response.getEntity(String.class))
-                .isEqualToIgnoringCase(format("Light with id %s has not been found.", id.uuid()));
+                .isEqualToIgnoringCase(format("Appliance with id %s has not been found.", id.uuid()));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // then
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND_404);
         assertThat(EntityUtils.toString(response.getEntity()))
-                .isEqualToIgnoringCase(format("Light with id %s has not been found.", id.uuid()));
+                .isEqualToIgnoringCase(format("Appliance with id %s has not been found.", id.uuid()));
     }
 
     @Test

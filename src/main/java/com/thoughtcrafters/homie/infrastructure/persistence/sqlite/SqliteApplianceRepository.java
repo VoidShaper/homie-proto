@@ -63,7 +63,7 @@ public class SqliteApplianceRepository implements ApplianceRepository {
     @Override
     public void save(Appliance appliance) {
         try (Handle handle = sqliteDbi.open()) {
-            handle.execute(format("update appliance set room_id=\"%s\" where appliance_id=\"%s\"",
+            handle.execute(format("update appliance set room_id=%s where appliance_id=\"%s\"",
                                   roomIdOrNull(appliance),
                                   appliance.id().uuid().toString()));
             switch (appliance.type()) {
@@ -82,7 +82,7 @@ public class SqliteApplianceRepository implements ApplianceRepository {
 
     private String roomIdOrNull(Appliance appliance) {
         return appliance.roomId().isPresent() ?
-                appliance.roomId().get().uuid().toString() : null;
+                "\"" + appliance.roomId().get().uuid().toString() + "\"" : null;
     }
 
     @Override
