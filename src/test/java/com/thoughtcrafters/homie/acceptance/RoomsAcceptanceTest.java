@@ -9,6 +9,9 @@ import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.rooms.Point;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
+import com.thoughtcrafters.homie.infrastructure.persistence.sqlite.SqliteConnectionFactory;
+import com.thoughtcrafters.homie.infrastructure.persistence.sqlite.SqliteDbRebuildCommand;
+import io.dropwizard.testing.junit.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPatch;
@@ -16,10 +19,13 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.skife.jdbi.v2.DBI;
 
 import javax.ws.rs.core.MediaType;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +36,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class RoomsAcceptanceTest extends AcceptanceTest {
 
+    public static String dbTestFile = "homieTest.db";
+
     @ClassRule
     public static final DropwizardAppRule<HomieConfiguration> app =
-            new DropwizardAppRule<>(HomieApplication.class, "homie.yml");
+            new DropwizardAppRule<>(HomieApplication.class, "homie.yml",
+                                    ConfigOverride.config("dbPath", dbTestFile));
+
+    private DBI jdbiConnection = SqliteConnectionFactory.jdbiConnectionTo(dbTestFile);
+
+    @Before
+    public void setUp() throws Exception {
+        new SqliteDbRebuildCommand().rebuildDb(jdbiConnection);
+    }
 
     @After
     public void tearDown() throws Exception {
         app.<HomieApplication>getApplication().clearAllData();
+        new File(dbTestFile).delete();
     }
 
     @Test

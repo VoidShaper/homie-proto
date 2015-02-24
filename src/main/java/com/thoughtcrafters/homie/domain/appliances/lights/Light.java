@@ -72,6 +72,7 @@ public class Light extends Appliance {
 
         if (!id().equals(light.id())) return false;
         if (!name().equals(light.name())) return false;
+        if (!roomId().equals(light.roomId())) return false;
         if (switchState != light.switchState) return false;
 
         return true;
@@ -81,6 +82,7 @@ public class Light extends Appliance {
     public int hashCode() {
         int result = id().hashCode();
         result = 31 * result + name().hashCode();
+        result = 31 * result + roomId().hashCode();
         result = 31 * result + switchState.hashCode();
         return result;
     }
@@ -91,6 +93,7 @@ public class Light extends Appliance {
                 "id=" + id() +
                 ", name='" + name() + '\'' +
                 ", switchState=" + switchState +
-                '}';
+                (roomId().isPresent() ? ", roomId=" + roomId().get() : "") +
+                "}";
     }
 }

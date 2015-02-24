@@ -5,9 +5,8 @@ import static java.lang.String.format;
 public class ApplianceNotFoundException extends RuntimeException {
     private final ApplianceId applianceId;
 
-    public ApplianceNotFoundException(ApplianceId applianceId, ApplianceType type) {
-        super(format("Appliance of type %s with id %s not found.",
-                     type, applianceId));
+    public ApplianceNotFoundException(ApplianceId applianceId) {
+        super(format("Appliance of with id %s not found.", applianceId));
         this.applianceId = applianceId;
     }
 

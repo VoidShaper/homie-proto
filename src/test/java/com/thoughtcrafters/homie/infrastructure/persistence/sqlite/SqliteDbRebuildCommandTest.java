@@ -50,12 +50,12 @@ public class SqliteDbRebuildCommandTest {
         dbRebuildCommand.run(null, null, app.getConfiguration());
 
         // then
-        DBI dbi = SqliteConnectionFactory.jdbiFrom(app.getConfiguration().dbPath());
+        DBI dbi = SqliteConnectionFactory.jdbiConnectionTo(app.getConfiguration().dbPath());
         assertCreatedATable(dbi, "room");
         assertCreatedATable(dbi, "appliance");
-        assertCreatedATable(dbi, "shape");
-        assertCreatedATable(dbi, "shapePoint");
-        assertCreatedATable(dbi, "roomAppliance");
+        assertCreatedATable(dbi, "shape_point");
+        assertCreatedATable(dbi, "room_appliance");
+        assertCreatedATable(dbi, "light");
     }
 
     private void assertCreatedATable(DBI dbi, String tableName) {

@@ -22,7 +22,7 @@ public class HashMapApplianceRepository implements ApplianceRepository {
         if(appliances.containsKey(applianceId)) {
             return appliances.get(applianceId).copy();
         }
-        throw new ApplianceNotFoundException(applianceId, ApplianceType.LIGHT);
+        throw new ApplianceNotFoundException(applianceId);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class HashMapApplianceRepository implements ApplianceRepository {
     public void save(Appliance appliance) {
         checkNotNull(appliance);
         if(!appliances.containsKey(appliance.id())) {
-            throw new ApplianceNotFoundException(appliance.id(), ApplianceType.LIGHT);
+            throw new ApplianceNotFoundException(appliance.id());
         }
         appliances.put(appliance.id(), appliance.copy());
     }
