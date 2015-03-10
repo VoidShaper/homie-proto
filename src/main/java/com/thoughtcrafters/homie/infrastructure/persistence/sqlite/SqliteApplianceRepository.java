@@ -32,9 +32,7 @@ public class SqliteApplianceRepository implements ApplianceRepository {
     public Appliance getBy(ApplianceId applianceId) {
         try (Handle handle = sqliteDbi.open()) {
             List<Map<String, Object>> results = handle
-                    .createQuery(format("select * from appliance where appliance_id = \"%s\"",
-                                        applianceId.uuid().toString()))
-                    .list();
+                    .select("select * from appliance where appliance_id = ?", applianceId.uuid());
             if (results.isEmpty()) {
                 throw new ApplianceNotFoundException(applianceId);
             }
@@ -63,15 +61,15 @@ public class SqliteApplianceRepository implements ApplianceRepository {
     @Override
     public void save(Appliance appliance) {
         try (Handle handle = sqliteDbi.open()) {
-            handle.execute(format("update appliance set room_id=%s where appliance_id=\"%s\"",
+            handle.execute("update appliance set room_id = ? where appliance_id = ?",
                                   roomIdOrNull(appliance),
-                                  appliance.id().uuid().toString()));
+                                  appliance.id().uuid());
             switch (appliance.type()) {
                 case LIGHT:
                     Light light = (Light) appliance;
-                    handle.execute(format("update light set switch_state=\"%s\" where appliance_id=\"%s\"",
+                    handle.execute("update light set switch_state = ? where appliance_id = ?",
                                    light.switchState(),
-                                   appliance.id().uuid().toString()));
+                                   appliance.id().uuid());
                     return;
                 default:
                     throw new ApplianceTypeNotSupportedException(
@@ -80,18 +78,15 @@ public class SqliteApplianceRepository implements ApplianceRepository {
         }
     }
 
-    private String roomIdOrNull(Appliance appliance) {
-        return appliance.roomId().isPresent() ?
-                "\"" + appliance.roomId().get().uuid().toString() + "\"" : null;
+    private UUID roomIdOrNull(Appliance appliance) {
+        return appliance.roomId().isPresent() ? appliance.roomId().get().uuid() : null;
     }
 
     @Override
     public List<Appliance> getAll() {
         List<Appliance> appliances = newArrayList();
         try (Handle handle = sqliteDbi.open()) {
-            List<Map<String, Object>> results = handle
-                    .createQuery(format("select * from appliance"))
-                    .list();
+            List<Map<String, Object>> results = handle.select("select * from appliance");
             for (Map<String, Object> applianceResult : results) {
                 appliances.add(mapResultToAppliance(handle, applianceResult));
             }
@@ -105,9 +100,8 @@ public class SqliteApplianceRepository implements ApplianceRepository {
 
         if (applianceType == ApplianceType.LIGHT) {
             Map<String, Object> lightResult = handle
-                    .createQuery(format("select * from light where appliance_id = \"%s\"",
-                                        applianceIdResult))
-                    .first();
+                    .select("select * from light where appliance_id = ?", applianceIdResult)
+                    .get(0);
             String roomIdValue = (String) applianceResult.get("room_id");
             RoomId roomId = roomIdValue == null ? null : new RoomId(UUID.fromString(roomIdValue));
             SwitchState switchState = SwitchState.valueOf((String) lightResult.get("switch_State"));
