@@ -94,17 +94,18 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
 
         assertThat(response.getEntity(Map.class))
-                .isEqualTo(ImmutableMap.of(
-                        "id", id.uuid().toString(),
-                        "switchState", SwitchState.OFF.name(),
-                        "name", "aName",
-                        "type", "LIGHT",
-                        "operations", ImmutableList.of(
-                                patchEnum(id,
-                                          "switchState",
-                                          SWITCH_DESCRIPTION,
-                                          ImmutableList.of("ON", "OFF")))
-                ));
+                .isEqualTo(ImmutableMap.builder()
+                                       .put("id", id.uuid().toString())
+                                       .put("state", "IDLE")
+                                       .put("switchState", SwitchState.OFF.name())
+                                       .put("name", "aName")
+                                       .put("type", "LIGHT")
+                                       .put("operations", ImmutableList.of(
+                                               patchEnum(id,
+                                                         "switchState",
+                                                         SWITCH_DESCRIPTION,
+                                                         ImmutableList.of("ON", "OFF"))))
+                                       .build());
     }
 
     @Test
@@ -171,7 +172,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // then
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
         assertThat(aLightResponseFor(id))
-                .containsEntry("switchState", SwitchState.ON.name());
+                .containsEntry("switchState", SwitchState.ON.name())
+                .containsEntry("state", "WORKING");
     }
 
     @Test
@@ -186,7 +188,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // then
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
         assertThat(aLightResponseFor(id))
-                .containsEntry("switchState", SwitchState.OFF.name());
+                .containsEntry("switchState", SwitchState.OFF.name())
+                .containsEntry("state", "IDLE");
     }
 
     private CloseableHttpResponse aLightHasBeenTurnedTo(ApplianceId id, SwitchState switchState) throws IOException {
@@ -207,7 +210,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     public void getsBothAddedAppliancesWhenGettingAll() throws JsonProcessingException {
         // given
         ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLight");
-        ApplianceId lightOnId = aLightHasBeenCreatedWith("secondLight");
+        ApplianceId secondLightOffId = aLightHasBeenCreatedWith("secondLight");
 
         // when
         ClientResponse response = Client.create()
@@ -218,24 +221,31 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(200);
         assertThat((List<Map<String, Object>>) response.getEntity(List.class))
                 .containsOnly(
-                        ImmutableMap.of("name", "firstLight",
-                                        "switchState", SwitchState.OFF.name(),
-                                        "id", lightOffId.uuid().toString(),
-                                        "type", "LIGHT",
-                                        "operations",
-                                        ImmutableList.of(
-                                                patchEnum(lightOffId, "switchState", SWITCH_DESCRIPTION,
-                                                          ImmutableList.of("ON", "OFF")
-                                                ))),
-                        ImmutableMap.of("name", "secondLight",
-                                        "switchState", SwitchState.OFF.name(),
-                                        "id", lightOnId.uuid().toString(),
-                                        "type", "LIGHT",
-                                        "operations",
-                                        ImmutableList.of(
-                                                patchEnum(lightOnId, "switchState", SWITCH_DESCRIPTION,
-                                                          ImmutableList.of("ON", "OFF")
-                                                ))));
+                        ImmutableMap.<String, Object>builder()
+                                    .put("name", "firstLight")
+                                    .put("switchState", SwitchState.OFF.name())
+                                    .put("id", lightOffId.uuid().toString())
+                                    .put("state", "IDLE")
+                                    .put("type", "LIGHT")
+                                    .put("operations",
+                                         ImmutableList.of(
+                                                 patchEnum(lightOffId, "switchState", SWITCH_DESCRIPTION,
+                                                           ImmutableList.of("ON", "OFF")
+                                                 )))
+                                    .build(),
+                        ImmutableMap.<String, Object>builder()
+                                    .put("name", "secondLight")
+                                    .put("switchState", SwitchState.OFF.name())
+                                    .put("id", secondLightOffId.uuid().toString())
+                                    .put("state", "IDLE")
+                                    .put("type", "LIGHT")
+                                    .put("operations",
+                                         ImmutableList.of(
+                                                 patchEnum(secondLightOffId, "switchState", SWITCH_DESCRIPTION,
+                                                           ImmutableList.of("ON", "OFF")
+                                                 )))
+                                    .build()
+                );
     }
 
     private ImmutableMap<String, Object> patchEnum(ApplianceId id,
@@ -255,6 +265,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                            .put("enumValues", enumValues)
                            .build();
     }
+
 
     @Override
     public DropwizardAppRule<HomieConfiguration> app() {

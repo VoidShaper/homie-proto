@@ -68,5 +68,7 @@ public abstract class Appliance {
         throw new NoMatchingOperationForExecutionException(id, execution);
     }
 
+    public abstract ApplianceState state();
+
     public abstract Appliance copy();
 }

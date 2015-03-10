@@ -2,6 +2,7 @@ package com.thoughtcrafters.homie.domain.appliances.lights;
 
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceState;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
 import com.thoughtcrafters.homie.domain.appliances.operations.PropertyType;
@@ -54,9 +55,11 @@ public class Light extends Appliance {
         return ApplianceType.LIGHT;
     }
 
-    public SwitchState state() {
-        return this.switchState;
+    @Override
+    public ApplianceState state() {
+        return switchState == SwitchState.OFF ? ApplianceState.IDLE : ApplianceState.WORKING;
     }
+
 
     @Override
     public Appliance copy() {

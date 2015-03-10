@@ -20,6 +20,7 @@ public class LightSerializer extends JsonSerializer<Light> {
         jsonGenerator.writeStringField("id", light.id().uuid().toString());
         jsonGenerator.writeStringField("name", light.name());
         jsonGenerator.writeStringField("type", light.type().toString());
+        jsonGenerator.writeStringField("state", light.state().toString());
 
         if(light.roomId().isPresent()) {
             jsonGenerator.writeStringField("roomId", light.roomId().get().uuid().toString());
