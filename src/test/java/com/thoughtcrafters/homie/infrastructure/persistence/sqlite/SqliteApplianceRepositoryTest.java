@@ -4,6 +4,7 @@ import com.thoughtcrafters.homie.HomieApplication;
 import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class SqliteApplianceRepositoryTest {
 
@@ -79,8 +81,7 @@ public class SqliteApplianceRepositoryTest {
                 MapEntry.entry("appliance_type", "LIGHT"),
                 MapEntry.entry("room_id", null));
 
-        assertThat(dbResultFor("light"))
-                .hasSize(1);
+        assertThat(dbResultFor("light")).hasSize(1);
         assertThat(dbResultFor("light").get(0))
                 .containsOnly(
                         MapEntry.entry("appliance_id", appliance.id().uuid().toString()),
@@ -100,6 +101,21 @@ public class SqliteApplianceRepositoryTest {
 
         // then
         assertThat(appliance).isNotNull().isEqualTo(aLight);
+    }
+
+    @Test
+    public void throwsApplianceNotFoundExceptionWhenNoApplianceFound() throws Exception {
+        // given
+        ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
+
+        // when
+        try {
+            sqliteApplianceRepository.getBy(applianceId);
+            fail("Expected ApplianceNotFoundException to be thrown");
+        } catch (ApplianceNotFoundException e) {
+            // then
+            assertThat(e.appliance()).isEqualTo(applianceId);
+        }
     }
 
     @Test

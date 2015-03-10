@@ -44,11 +44,12 @@ public class SqliteDbRebuildCommand extends ConfiguredCommand<HomieConfiguration
                               + " foreign key(room_id) references room(room_id))"
             );
 
-            h.execute("create table room_appliance (room_appliance_id integer, appliance_id text not null, "
-                              + " room_id text not null, x real not null, y real not null,"
+            h.execute("create table room_appliance (room_appliance_id integer primary key,"
+                              + " x real, y real, room_id text, appliance_id text,"
                               + " foreign key(room_id) references room(room_id),"
                               + " foreign key(appliance_id) references appliance(appliance_id))"
             );
+
         }
     }
 }
