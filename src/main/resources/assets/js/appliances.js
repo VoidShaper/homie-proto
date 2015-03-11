@@ -43,10 +43,12 @@ angular.module('homieApp')
             var otherFields = {};
             for (var property in appliance) {
                 if (appliance.hasOwnProperty(property)
-                && property != 'operations'
-                && property != 'id'
-                && property != 'type'
-                && property != 'name') {
+                    && property != 'operations'
+                    && property != 'id'
+                    && property != 'type'
+                    && property != 'state'
+                    && property != 'roomId'
+                    && property != 'name') {
                     otherFields[property] = appliance[property];
                 }
             }

@@ -4,15 +4,19 @@
         <table class="table">
             <tr>
                 <th class="col-md-3">Appliance Id</th>
-                <th class="col-md-2">Name</th>
+                <th class="col-md-1">Name</th>
                 <th class="col-md-1">Type</th>
-                <th class="col-md-3">Properties</th>
-                <th class="col-md-4">Operations</th>
+                <th class="col-md-1">State</th>
+                <th class="col-md-2">RoomId</th>
+                <th class="col-md-1">Properties</th>
+                <th class="col-md-3">Operations</th>
             </tr>
             <tr ng-repeat="appliance in appliances">
                 <td>{{appliance.id}}</td>
                 <td>{{appliance.name}}</td>
                 <td>{{appliance.type}}</td>
+                <td>{{appliance.state}}</td>
+                <td><a href="#/rooms/{{appliance.roomId}}">{{appliance.roomId}}</a></td>
                 <td>
                     <ul class="list-group">
                         <li ng-repeat="(property, value) in otherFieldsFrom(appliance)"
