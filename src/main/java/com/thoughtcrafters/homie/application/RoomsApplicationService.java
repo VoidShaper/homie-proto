@@ -33,6 +33,13 @@ public class RoomsApplicationService {
     public void addApplianceToRoom(ApplianceId applianceId, RoomId roomId, Point point) {
         Room room = roomsRepository.getBy(roomId);
         Appliance appliance = applianceRepository.getBy(applianceId);
+
+        if(appliance.roomId().isPresent()) {
+            Room oldRoom = roomsRepository.getBy(appliance.roomId().get());
+            oldRoom.remove(appliance);
+            roomsRepository.save(oldRoom);
+        }
+
         room.place(appliance).at(point);
         roomsRepository.save(room);
         applianceRepository.save(appliance);

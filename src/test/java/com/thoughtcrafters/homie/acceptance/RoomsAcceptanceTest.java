@@ -151,6 +151,63 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    public void placingAlreadyPlacedApplianceInTheSameRoomMovesItToNewPosition()
+            throws IOException {
+        // given
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
+        RoomId roomId = aRoomHasBeenCreatedWith("aFirstPlacementRoom", rectangle20x20());
+        anApplianceHasBeenAddedToTheRoom(roomId, lightId, new Point(18, 32));
+
+        // when
+        CloseableHttpResponse response =
+                anApplianceHasBeenAddedToTheRoom(roomId, lightId, new Point(87, 33.45));
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode())
+                .isEqualTo(HttpStatus.NO_CONTENT_204);
+
+        assertThat(aLightResponseFor(lightId))
+                .containsEntry("roomId", roomId.uuid().toString());
+
+        assertThat(aRoomResponseFor(roomId))
+                .containsEntry("appliances",
+                               ImmutableMap.of(lightId.uuid().toString(),
+                                               ImmutableMap.of("point",
+                                                               ImmutableMap.of("x", num(87),
+                                                                               "y", num(33.45)))));
+    }
+
+    @Test
+    public void placingAlreadyPlacedApplianceInADifferentRoomRemovesItFromTheOldRoom()
+            throws IOException {
+        // given
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
+        RoomId firstRoomId = aRoomHasBeenCreatedWith("aFirstPlacementRoom", rectangle20x20());
+        anApplianceHasBeenAddedToTheRoom(firstRoomId, lightId, new Point(8, 12));
+        RoomId secondRoomId = aRoomHasBeenCreatedWith("aSecondPlacementRoom", rectangle20x20());
+
+        // when
+        CloseableHttpResponse response =
+                anApplianceHasBeenAddedToTheRoom(secondRoomId, lightId, new Point(9.5, 6.3));
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode())
+                .isEqualTo(HttpStatus.NO_CONTENT_204);
+
+        assertThat(aLightResponseFor(lightId))
+                .containsEntry("roomId", secondRoomId.uuid().toString());
+
+        assertThat(aRoomResponseFor(secondRoomId))
+                .containsEntry("appliances",
+                               ImmutableMap.of(lightId.uuid().toString(),
+                                               ImmutableMap.of("point",
+                                                               ImmutableMap.of("x", num(9.5),
+                                                                               "y", num(6.3)))));
+        assertThat(aRoomResponseFor(firstRoomId))
+                .containsEntry("appliances", ImmutableMap.of());
+    }
+
+    @Test
     public void getsAllTheRooms() throws Exception {
         // given
         RoomId id1 = aRoomHasBeenCreatedWith("nameOne", rectangle20x20());
