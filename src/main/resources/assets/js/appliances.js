@@ -34,7 +34,6 @@ angular.module('homieApp')
                 });
         };
 
-
         $scope.setOperationValue = function (operation, value) {
             operation.value = value;
         };

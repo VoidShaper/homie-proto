@@ -14,6 +14,12 @@ angular.module('homieApp')
             templateUrl: '/html/test.html'
         };
     })
+    .directive("appliancestab", function () {
+        return {
+            restrict: 'E',
+            templateUrl: '/html/templates/appliances-tab.html'
+        };
+    })
     .directive("roomshape", function () {
         return {
             restrict: "E",
