@@ -14,7 +14,6 @@ angular.module('homieApp')
 
         // TODO get these from server
         $scope.applianceTypes = ['LIGHT'];
-        $scope.initialStates = ['ON', 'OFF'];
 
         $scope.alerts = [];
         $scope.newAppliance = function () {
@@ -34,37 +33,17 @@ angular.module('homieApp')
                 });
         };
 
-        $scope.setOperationValue = function (operation, value) {
-            operation.value = value;
-        };
-
-        $scope.otherFieldsFrom = function (appliance) {
-            var otherFields = {};
-            for (var property in appliance) {
-                if (appliance.hasOwnProperty(property)
-                    && property != 'operations'
-                    && property != 'id'
-                    && property != 'type'
-                    && property != 'state'
-                    && property != 'roomId'
-                    && property != 'name') {
-                    otherFields[property] = appliance[property];
-                }
-            }
-            return otherFields;
-        };
-
-        $scope.perform = function (operation) {
+        $scope.updateProperty = function (appliance, propertyName, propertyValue) {
             $http({
-                url: operation.uri,
-                method: operation.method,
+                url: "/appliances/" + appliance.id,
+                method: "PATCH",
                 headers: {
-                    'Content-Type': operation.contentType
+                    'Content-Type': "application/json-patch+json"
                 },
                 data: {
-                    op: operation.op,
-                    path: operation.property,
-                    value: operation.value
+                    op: "replace",
+                    path: "/" + propertyName,
+                    value: propertyValue
                 }
             })
                 .success(function (data, status, headers, config) {
@@ -81,6 +60,7 @@ angular.module('homieApp')
                     }];
                 });
         };
+
         $scope.closeAlert = function (index) {
             $scope.alerts.splice(index, 1);
         }

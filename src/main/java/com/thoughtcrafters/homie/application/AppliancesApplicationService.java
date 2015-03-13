@@ -1,10 +1,10 @@
 package com.thoughtcrafters.homie.application;
 
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceRepository;
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationExecution;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
+import com.thoughtcrafters.homie.domain.appliances.properties.PropertyUpdate;
 
 import java.util.List;
 
@@ -27,9 +27,9 @@ public class AppliancesApplicationService {
         return applianceRepository.getAll();
     }
 
-    public void performOperation(ApplianceId applianceId, OperationExecution operationExecution) {
+    public void updateProperty(ApplianceId applianceId, PropertyUpdate propertyUpdate) {
         Appliance appliance = applianceRepository.getBy(applianceId);
-        appliance.perform(operationExecution);
+        appliance.updatePropertyWith(propertyUpdate);
         applianceRepository.save(appliance);
     }
 }

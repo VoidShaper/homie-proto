@@ -1,10 +1,7 @@
 package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationExecution;
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationType;
+import com.thoughtcrafters.homie.domain.appliances.properties.PropertyUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import java.io.IOException;
 
 public class PatchResourceRequest {
     @NotEmpty
@@ -38,20 +35,12 @@ public class PatchResourceRequest {
         this.value = value;
     }
 
-    public OperationExecution toOperationExecution() {
-        return new OperationExecution(operationTypeFrom(op), path.split("/")[1], value);
+    public PropertyUpdate toPropertyUpdate() {
+        return new PropertyUpdate<String>(nameFrom(path), value);
     }
 
-    private OperationType operationTypeFrom(String op) {
-        switch (op) {
-            case "add":
-                return OperationType.ADD;
-            case "replace":
-                return OperationType.UPDATE;
-            case "remove":
-                return OperationType.REMOVE;
-            default:
-                return OperationType.UNKNOWN;
-        }
+    private String nameFrom(String path) {
+        return path.replaceAll("/", "");
     }
+
 }

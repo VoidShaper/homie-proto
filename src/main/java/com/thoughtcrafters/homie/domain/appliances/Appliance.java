@@ -1,10 +1,8 @@
 package com.thoughtcrafters.homie.domain.appliances;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
-import com.thoughtcrafters.homie.domain.appliances.operations.Operation;
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationDefinition;
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationExecution;
+import com.thoughtcrafters.homie.domain.appliances.properties.ApplianceProperty;
+import com.thoughtcrafters.homie.domain.appliances.properties.PropertyUpdate;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 
 import java.util.HashSet;
@@ -17,13 +15,12 @@ public abstract class Appliance {
     protected final ApplianceId id;
     protected final String name;
     protected Optional<RoomId> roomId;
-    protected Set<Operation> operations;
+    protected Set<ApplianceProperty> properties = new HashSet<>();
 
     public Appliance(ApplianceId id, String name, Optional<RoomId> roomId) {
         this.id = id;
         this.name = name;
         this.roomId = roomId;
-        this.operations = new HashSet<>();
     }
 
     public ApplianceId id() {
@@ -49,24 +46,11 @@ public abstract class Appliance {
         return roomId;
     }
 
-    public Set<OperationDefinition> definedOperations() {
-        return ImmutableSet.copyOf(FluentIterable.from(operations)
-                                                 .transform(Operation::definition)
-                                                 .toSet());
+    public Set<ApplianceProperty> properties() {
+        return ImmutableSet.copyOf(properties);
     }
 
-    public void perform(OperationExecution operationExecution) {
-        operationMatching(operationExecution).perform(operationExecution);
-    }
-
-    private Operation operationMatching(OperationExecution execution) {
-        for(Operation operation : operations) {
-            if(operation.matches(execution)) {
-                return operation;
-            }
-        }
-        throw new NoMatchingOperationForExecutionException(id, execution);
-    }
+    public abstract void updatePropertyWith(PropertyUpdate propertyUpdate);
 
     public abstract ApplianceState state();
 

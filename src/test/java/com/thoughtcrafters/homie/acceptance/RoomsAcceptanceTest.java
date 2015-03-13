@@ -61,7 +61,8 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     public void createsARoomCorrectly() throws JsonProcessingException {
         // given
         String requestEntity = jsonFrom(
-                ImmutableMap.<String, Object>of("name", "roomName",
+                ImmutableMap.<String, Object>of("name",
+                                                "roomName",
                                                 "shape", rectangle20x20()));
 
         // when

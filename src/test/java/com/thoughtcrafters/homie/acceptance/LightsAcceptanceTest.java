@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.assertj.core.data.MapEntry;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +27,6 @@ import org.junit.Test;
 import org.skife.jdbi.v2.DBI;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -94,18 +94,20 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
 
         assertThat(response.getEntity(Map.class))
-                .isEqualTo(ImmutableMap.builder()
-                                       .put("id", id.uuid().toString())
-                                       .put("state", "IDLE")
-                                       .put("switchState", SwitchState.OFF.name())
-                                       .put("name", "aName")
-                                       .put("type", "LIGHT")
-                                       .put("operations", ImmutableList.of(
-                                               patchEnum(id,
-                                                         "switchState",
-                                                         SWITCH_DESCRIPTION,
-                                                         ImmutableList.of("ON", "OFF"))))
-                                       .build());
+                .containsOnly(
+                        MapEntry.entry("id", id.uuid().toString()),
+                        MapEntry.entry("state", "IDLE"),
+                        MapEntry.entry("name", "aName"),
+                        MapEntry.entry("type", "LIGHT"),
+                        MapEntry.entry("properties", ImmutableMap.<String, Object>of(
+                                "switchState",
+                                ImmutableMap.<String, Object>of(
+                                        "value", "OFF",
+                                        "description", "If the light is on or off.",
+                                        "type", "ENUM",
+                                        "editable", true,
+                                        "availableValues", ImmutableList.of("ON", "OFF"))
+                        )));
     }
 
     @Test
@@ -172,8 +174,17 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // then
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
         assertThat(aLightResponseFor(id))
-                .containsEntry("switchState", SwitchState.ON.name())
+                .containsEntry("properties", ImmutableMap.of(
+                        "switchState",
+                       ImmutableMap.<String, Object>of(
+                                "value", "ON",
+                                "description", "If the light is on or off.",
+                                "type", "ENUM",
+                                "editable", true,
+                                "availableValues", ImmutableList.of("ON", "OFF"))
+                ))
                 .containsEntry("state", "WORKING");
+
     }
 
     @Test
@@ -188,22 +199,57 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         // then
         assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
         assertThat(aLightResponseFor(id))
-                .containsEntry("switchState", SwitchState.OFF.name())
+                .containsEntry("properties", ImmutableMap.of(
+                        "switchState",
+                        ImmutableMap.<String, Object>of(
+                                "value", "OFF",
+                                "description", "If the light is on or off.",
+                                "type", "ENUM",
+                                "editable", true,
+                                "availableValues", ImmutableList.of("ON", "OFF"))
+                ))
                 .containsEntry("state", "IDLE");
     }
 
+    @Test
+    public void triedToUpdateSwitchStateToAnUnknownValue() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName");
+
+        // when
+        CloseableHttpResponse response = aLightHasBeenTurnedTo(id, "OFS");
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+        assertThat(EntityUtils.toString(response.getEntity()))
+                .isEqualTo(format("Appliance %s does not support update of the property %s to %s",
+                                  id.uuid(), "switchState", "OFS"));
+        assertThat(aLightResponseFor(id))
+                .containsEntry("properties", ImmutableMap.of(
+                        "switchState",
+                        ImmutableMap.<String, Object>of(
+                                "value", "OFF",
+                                "description", "If the light is on or off.",
+                                "type", "ENUM",
+                                "editable", true,
+                                "availableValues", ImmutableList.of("ON", "OFF"))
+                ))
+                .containsEntry("state", "IDLE");
+    }
     private CloseableHttpResponse aLightHasBeenTurnedTo(ApplianceId id, SwitchState switchState) throws IOException {
+        return aLightHasBeenTurnedTo(id, switchState.toString());
+    }
+
+    private CloseableHttpResponse aLightHasBeenTurnedTo(ApplianceId id, String switchState) throws IOException {
         ImmutableMap<String, Object> request = ImmutableMap.of("op", "replace",
                                                                "path", "/switchState",
-                                                               "value", switchState.toString());
+                                                               "value", switchState);
 
         HttpPatch httpPatch = new HttpPatch(appliancesUri(id).build());
         httpPatch.setEntity(new StringEntity(jsonFrom(request)));
         httpPatch.addHeader("Content-Type", "application/json-patch+json");
 
-        CloseableHttpResponse response = HttpClients.createDefault().execute(httpPatch);
-        response.close();
-        return response;
+        return HttpClients.createDefault().execute(httpPatch);
     }
 
     @Test
@@ -223,49 +269,36 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                 .containsOnly(
                         ImmutableMap.<String, Object>builder()
                                     .put("name", "firstLight")
-                                    .put("switchState", SwitchState.OFF.name())
                                     .put("id", lightOffId.uuid().toString())
                                     .put("state", "IDLE")
                                     .put("type", "LIGHT")
-                                    .put("operations",
-                                         ImmutableList.of(
-                                                 patchEnum(lightOffId, "switchState", SWITCH_DESCRIPTION,
-                                                           ImmutableList.of("ON", "OFF")
-                                                 )))
+                                    .put("properties", ImmutableMap.<String, Object>of(
+                                            "switchState",
+                                            ImmutableMap.<String, Object>of(
+                                                    "value", "OFF",
+                                                    "description", "If the light is on or off.",
+                                                    "type", "ENUM",
+                                                    "editable", true,
+                                                    "availableValues", ImmutableList.of("ON", "OFF"))
+                                    ))
                                     .build(),
                         ImmutableMap.<String, Object>builder()
                                     .put("name", "secondLight")
-                                    .put("switchState", SwitchState.OFF.name())
                                     .put("id", secondLightOffId.uuid().toString())
                                     .put("state", "IDLE")
                                     .put("type", "LIGHT")
-                                    .put("operations",
-                                         ImmutableList.of(
-                                                 patchEnum(secondLightOffId, "switchState", SWITCH_DESCRIPTION,
-                                                           ImmutableList.of("ON", "OFF")
-                                                 )))
+                                    .put("properties", ImmutableMap.<String, Object>of(
+                                            "switchState",
+                                            ImmutableMap.<String, Object>of(
+                                                    "value", "OFF",
+                                                    "description", "If the light is on or off.",
+                                                    "type", "ENUM",
+                                                    "editable", true,
+                                                    "availableValues", ImmutableList.of("ON", "OFF"))
+                                    ))
                                     .build()
                 );
     }
-
-    private ImmutableMap<String, Object> patchEnum(ApplianceId id,
-                                                   String field,
-                                                   String description,
-                                                   ImmutableList<String> enumValues) {
-        return ImmutableMap.<String, Object>builder()
-                           .put("uri", UriBuilder.fromPath("/appliances/{applianceId}")
-                                                 .build(id.uuid().toString())
-                                                 .toString())
-                           .put("description", description)
-                           .put("method", "PATCH")
-                           .put("op", "replace")
-                           .put("contentType", "application/json-patch+json")
-                           .put("property", "/" + field)
-                           .put("propertyType", "ENUM")
-                           .put("enumValues", enumValues)
-                           .build();
-    }
-
 
     @Override
     public DropwizardAppRule<HomieConfiguration> app() {

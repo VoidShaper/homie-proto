@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
-import com.thoughtcrafters.homie.domain.appliances.operations.OperationDefinition;
+import com.thoughtcrafters.homie.domain.appliances.properties.ApplianceProperty;
 
 import java.io.IOException;
 
@@ -25,15 +25,14 @@ public class LightSerializer extends JsonSerializer<Light> {
         if(light.roomId().isPresent()) {
             jsonGenerator.writeStringField("roomId", light.roomId().get().uuid().toString());
         }
-        jsonGenerator.writeStringField("switchState", light.switchState().toString());
 
-        jsonGenerator.writeArrayFieldStart("operations");
+        jsonGenerator.writeObjectFieldStart("properties");
 
-        for(OperationDefinition operationDefinition : light.definedOperations()) {
-            jsonGenerator.writeObject(operationDefinition);
+        for(ApplianceProperty applianceProperty : light.properties()) {
+            jsonGenerator.writeObjectField(applianceProperty.name(), applianceProperty);
         }
 
-        jsonGenerator.writeEndArray();
+        jsonGenerator.writeEndObject();
         jsonGenerator.writeEndObject();
     }
 }
