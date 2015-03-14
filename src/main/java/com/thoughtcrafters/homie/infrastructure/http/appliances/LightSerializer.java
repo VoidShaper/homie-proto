@@ -17,6 +17,8 @@ public class LightSerializer extends JsonSerializer<Light> {
             throws IOException {
         jsonGenerator.writeStartObject();
 
+        jsonGenerator.writeStringField("self", "/appliances/" + light.id().uuid());
+
         jsonGenerator.writeStringField("id", light.id().uuid().toString());
         jsonGenerator.writeStringField("name", light.name());
         jsonGenerator.writeStringField("type", light.type().toString());

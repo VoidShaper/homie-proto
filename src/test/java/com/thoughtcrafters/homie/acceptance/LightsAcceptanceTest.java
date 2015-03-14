@@ -107,7 +107,9 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                         "type", "ENUM",
                                         "editable", true,
                                         "availableValues", ImmutableList.of("ON", "OFF"))
-                        )));
+                        )),
+                        MapEntry.entry("self", "/appliances/" + id.uuid())
+                );
     }
 
     @Test
@@ -176,7 +178,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         assertThat(aLightResponseFor(id))
                 .containsEntry("properties", ImmutableMap.of(
                         "switchState",
-                       ImmutableMap.<String, Object>of(
+                        ImmutableMap.<String, Object>of(
                                 "value", "ON",
                                 "description", "If the light is on or off.",
                                 "type", "ENUM",
@@ -236,6 +238,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                 ))
                 .containsEntry("state", "IDLE");
     }
+
     private CloseableHttpResponse aLightHasBeenTurnedTo(ApplianceId id, SwitchState switchState) throws IOException {
         return aLightHasBeenTurnedTo(id, switchState.toString());
     }
@@ -281,6 +284,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                                     "editable", true,
                                                     "availableValues", ImmutableList.of("ON", "OFF"))
                                     ))
+                                    .put("self", "/appliances/" + lightOffId.uuid())
                                     .build(),
                         ImmutableMap.<String, Object>builder()
                                     .put("name", "secondLight")
@@ -296,6 +300,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                                     "editable", true,
                                                     "availableValues", ImmutableList.of("ON", "OFF"))
                                     ))
+                                    .put("self", "/appliances/" + secondLightOffId.uuid())
                                     .build()
                 );
     }
