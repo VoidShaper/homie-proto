@@ -103,7 +103,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     @Test
     public void addsAnApplianceToTheRoomWithAPatch() throws IOException {
         // given
-        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", false);
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
 
         // when
@@ -126,7 +126,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     @Test
     public void removesAnApplianceFromTheRoom() throws IOException {
         // given
-        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", false);
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
         anApplianceHasBeenAddedToTheRoom(id, lightId, new Point(8, 12));
 
@@ -155,7 +155,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     public void placingAlreadyPlacedApplianceInTheSameRoomMovesItToNewPosition()
             throws IOException {
         // given
-        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", false);
         RoomId roomId = aRoomHasBeenCreatedWith("aFirstPlacementRoom", rectangle20x20());
         anApplianceHasBeenAddedToTheRoom(roomId, lightId, new Point(18, 32));
 
@@ -182,7 +182,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     public void placingAlreadyPlacedApplianceInADifferentRoomRemovesItFromTheOldRoom()
             throws IOException {
         // given
-        ApplianceId lightId = aLightHasBeenCreatedWith("lightName");
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", false);
         RoomId firstRoomId = aRoomHasBeenCreatedWith("aFirstPlacementRoom", rectangle20x20());
         anApplianceHasBeenAddedToTheRoom(firstRoomId, lightId, new Point(8, 12));
         RoomId secondRoomId = aRoomHasBeenCreatedWith("aSecondPlacementRoom", rectangle20x20());

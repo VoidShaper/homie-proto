@@ -1,4 +1,4 @@
-package com.thoughtcrafters.homie.infrastructure.http.appliances;
+package com.thoughtcrafters.homie.infrastructure.http.appliances.properties;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;

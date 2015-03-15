@@ -116,7 +116,8 @@ public class SqliteRoomRepositoryTest {
         Room alreadyCreatedRoom = new Room(roomId, "aRoom", rectangle20x20());
         alreadyCreatedRoom.place(new Light(new ApplianceId(UUID.randomUUID()),
                                            "appLight",
-                                           Optional.<RoomId>empty()))
+                                           Optional.<RoomId>empty(),
+                                           false))
                           .at(new Point(5.5, 23));
         creationWasCalledFor(alreadyCreatedRoom);
 
@@ -150,7 +151,7 @@ public class SqliteRoomRepositoryTest {
         Room alreadyCreatedRoom = new Room(new RoomId(UUID.randomUUID()), "roomOne", rectangle20x20());
         Room anotherCreatedRoom = new Room(new RoomId(UUID.randomUUID()), "roomTwo", polyline5points());
         Room thirdRoomWithLight = new Room(new RoomId(UUID.randomUUID()), "roomTwo", polyline5points());
-        thirdRoomWithLight.place(new Light(new ApplianceId(UUID.randomUUID()), "were light", Optional.<RoomId>empty()))
+        thirdRoomWithLight.place(new Light(new ApplianceId(UUID.randomUUID()), "were light", Optional.<RoomId>empty(), false))
                 .at(new Point(3.3, 9.982));
         creationWasCalledFor(alreadyCreatedRoom);
         creationWasCalledFor(anotherCreatedRoom);
@@ -170,11 +171,11 @@ public class SqliteRoomRepositoryTest {
         // given
         Room initiallyCreatedRoom = new Room(new RoomId(UUID.randomUUID()), "exampleRoom", polyline5points());
         creationWasCalledFor(initiallyCreatedRoom);
-        Light lightInARoom = new Light(new ApplianceId(UUID.randomUUID()), "lightInARoom", Optional.<RoomId>empty());
+        Light lightInARoom = new Light(new ApplianceId(UUID.randomUUID()), "lightInARoom", Optional.<RoomId>empty(), false);
         Point lightInARoomPlace = new Point(7.5, 7.5);
         initiallyCreatedRoom.place(lightInARoom).at(lightInARoomPlace);
         Light anotherLightInARoom = new Light(new ApplianceId(UUID.randomUUID()), "lightInARoom",
-                                              Optional.<RoomId>empty());
+                                              Optional.<RoomId>empty(), false);
         Point anotherLightInARoomPlace = new Point(15, 25.3);
         initiallyCreatedRoom.place(anotherLightInARoom).at(anotherLightInARoomPlace);
 
@@ -221,17 +222,17 @@ public class SqliteRoomRepositoryTest {
     public void updateAppliancesThroughSaveIfTheEntryAlreadyExists() throws Exception {
         // given
         Room initiallyCreatedRoom = new Room(new RoomId(UUID.randomUUID()), "exampleRoom", polyline5points());
-        Light lightInARoom = new Light(new ApplianceId(UUID.randomUUID()), "lightInARoom", Optional.<RoomId>empty());
+        Light lightInARoom = new Light(new ApplianceId(UUID.randomUUID()), "lightInARoom", Optional.<RoomId>empty(), false);
         Point lightInARoomPlace = new Point(7.5, 7.5);
         initiallyCreatedRoom.place(lightInARoom).at(lightInARoomPlace);
 
         Light lightRemovedLater = new Light(new ApplianceId(UUID.randomUUID()), "lightRemovedLater",
-                                            Optional.<RoomId>empty());
+                                            Optional.<RoomId>empty(), false);
         initiallyCreatedRoom.place(lightRemovedLater).at(new Point(15, 25.3));
         creationWasCalledFor(initiallyCreatedRoom);
 
         Light lightPlacedLater = new Light(new ApplianceId(UUID.randomUUID()), "lightInARoom",
-                                           Optional.<RoomId>empty());
+                                           Optional.<RoomId>empty(), false);
         Point laterLightPlace = new Point(73, 28.98);
 
         // when

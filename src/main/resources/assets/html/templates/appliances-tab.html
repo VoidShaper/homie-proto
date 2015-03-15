@@ -20,23 +20,25 @@
                         <div><strong>{{ propertyName }}</strong>: {{ property.value }}</div>
                         <div><strong>description</strong>: {{ property.description }}</div>
 
-                        <div ng-if="property.type == 'ENUM'">
-                            <div ng-if="property.availableValues.length > 3">
-                                <select ng-options="enumValue for enumValue in operation.enumValues"
-                                        ng-model="operation.chosenValue">
+                        <div ng-if="property.editable">
+                            <div ng-if="property.type == 'ENUM'">
+                                <div ng-if="property.availableValues.length > 3">
+                                    <select ng-options="enumValue for enumValue in operation.enumValues"
+                                            ng-model="operation.chosenValue">
 
-                                </select>
-                                <button class="btn btn-link">perform</button>
-                            </div>
+                                    </select>
+                                    <button class="btn btn-link">perform</button>
+                                </div>
 
-                            <div ng-if="property.availableValues.length <= 3">
-                                <button class="btn btn-default"
-                                        ng-model="property.value"
-                                        ng-repeat="availableValue in property.availableValues"
-                                        btn-radio="availableValue"
-                                        ng-click="updateProperty(appliance, propertyName, availableValue)">
-                                    {{ availableValue }}
-                                </button>
+                                <div ng-if="property.availableValues.length <= 3">
+                                    <button class="btn btn-default"
+                                            ng-model="property.value"
+                                            ng-repeat="availableValue in property.availableValues"
+                                            btn-radio="availableValue"
+                                            ng-click="updateProperty(appliance, propertyName, availableValue)">
+                                        {{ availableValue }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

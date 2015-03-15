@@ -5,8 +5,8 @@ import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
+import com.thoughtcrafters.homie.domain.appliances.lights.LightCreation;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import io.dropwizard.testing.junit.ConfigOverride;
@@ -52,24 +52,40 @@ public class SqliteApplianceRepositoryTest {
     }
 
     @Test
-    public void returnsApplianceWithIdWhenCreatesOne() throws Exception {
+    public void returnsLightWithIdWhenCreatesOne() throws Exception {
         // when
-        Appliance appliance = sqliteApplianceRepository.createFrom(ApplianceType.LIGHT, "light123");
+        Appliance appliance = sqliteApplianceRepository.createFrom(new LightCreation("light123", false));
 
         // then
         assertThat(appliance)
                 .isEqualToIgnoringGivenFields(new Light(new ApplianceId(UUID.randomUUID()),
                                                         "light123",
-                                                        Optional.<RoomId>empty()),
+                                                        Optional.<RoomId>empty(),
+                                                        false),
                                               "id");
         assertThat(appliance.id()).isNotNull();
     }
 
     @Test
-    public void persistsRoomAppliance() throws Exception {
+    public void returnsDimmableLightWithIdWhenCreatesOne() throws Exception {
+        // when
+        Appliance appliance = sqliteApplianceRepository.createFrom(new LightCreation("light123", true));
+
+        // then
+        assertThat(appliance)
+                .isEqualToIgnoringGivenFields(new Light(new ApplianceId(UUID.randomUUID()),
+                                                        "light123",
+                                                        Optional.<RoomId>empty(),
+                                                        true),
+                                              "id");
+        assertThat(appliance.id()).isNotNull();
+    }
+
+    @Test
+    public void persistsLight() throws Exception {
         // when
         Appliance appliance =
-                sqliteApplianceRepository.createFrom(ApplianceType.LIGHT, "my light 123");
+                sqliteApplianceRepository.createFrom(new LightCreation("my light 123", false));
 
         // then
         assertThat(dbResultFor("appliance"))
@@ -85,15 +101,55 @@ public class SqliteApplianceRepositoryTest {
         assertThat(dbResultFor("light").get(0))
                 .containsOnly(
                         MapEntry.entry("appliance_id", appliance.id().uuid().toString()),
-                        MapEntry.entry("switch_state", "OFF")
+                        MapEntry.entry("switch_state", "OFF"),
+                        MapEntry.entry("dimmable", 0)
                 );
     }
 
     @Test
-    public void getsAnApplianceById() throws Exception {
+    public void persistsDimmableLight() throws Exception {
+        // when
+        Appliance appliance =
+                sqliteApplianceRepository.createFrom(new LightCreation("my light 123", true));
+
+        // then
+        assertThat(dbResultFor("appliance"))
+                .hasSize(1);
+
+        assertThat(dbResultFor("appliance").get(0)).containsOnly(
+                MapEntry.entry("appliance_id", appliance.id().uuid().toString()),
+                MapEntry.entry("name", "my light 123"),
+                MapEntry.entry("appliance_type", "LIGHT"),
+                MapEntry.entry("room_id", null));
+
+        assertThat(dbResultFor("light")).hasSize(1);
+        assertThat(dbResultFor("light").get(0))
+                .containsOnly(
+                        MapEntry.entry("appliance_id", appliance.id().uuid().toString()),
+                        MapEntry.entry("switch_state", "OFF"),
+                        MapEntry.entry("dimmable", 1)
+                );
+    }
+
+    @Test
+    public void getsALightById() throws Exception {
         // given
         ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
-        Light aLight = new Light(applianceId, "aLight", Optional.<RoomId>empty());
+        Light aLight = new Light(applianceId, "aLight", Optional.<RoomId>empty(), false);
+        creationWasCalledFor(aLight);
+
+        // when
+        Appliance appliance = sqliteApplianceRepository.getBy(applianceId);
+
+        // then
+        assertThat(appliance).isNotNull().isEqualTo(aLight);
+    }
+
+    @Test
+    public void getsADimmableLightById() throws Exception {
+        // given
+        ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
+        Light aLight = new Light(applianceId, "aLight", Optional.<RoomId>empty(), true);
         creationWasCalledFor(aLight);
 
         // when
@@ -123,7 +179,7 @@ public class SqliteApplianceRepositoryTest {
         // given
         ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
         Light aLight =
-                new Light(applianceId, "aLight", Optional.of(new RoomId(UUID.randomUUID())), SwitchState.ON);
+                new Light(applianceId, "aLight", Optional.of(new RoomId(UUID.randomUUID())), SwitchState.ON, false);
         creationWasCalledFor(aLight);
 
         // when
@@ -140,12 +196,14 @@ public class SqliteApplianceRepositoryTest {
                 new Light(new ApplianceId(UUID.randomUUID()),
                           "aLight",
                           Optional.of(new RoomId(UUID.randomUUID())),
-                          SwitchState.ON);
+                          SwitchState.ON,
+                          false);
         Light aLight2 =
                 new Light(new ApplianceId(UUID.randomUUID()),
                           "anotherLight",
                           Optional.empty(),
-                          SwitchState.OFF);
+                          SwitchState.OFF,
+                          true);
         creationWasCalledFor(aLight1);
         creationWasCalledFor(aLight2);
 
@@ -164,7 +222,8 @@ public class SqliteApplianceRepositoryTest {
                 new Light(new ApplianceId(UUID.randomUUID()),
                           "aLightApplianceName",
                           Optional.empty(),
-                          SwitchState.OFF);
+                          SwitchState.OFF,
+                          false);
 
         creationWasCalledFor(aLight);
 
@@ -187,7 +246,8 @@ public class SqliteApplianceRepositoryTest {
         assertThat(dbResultFor("light").get(0))
                 .containsOnly(
                         MapEntry.entry("appliance_id", aLight.id().uuid().toString()),
-                        MapEntry.entry("switch_state", "ON")
+                        MapEntry.entry("switch_state", "ON"),
+                        MapEntry.entry("dimmable", 0)
                 );
 
     }
@@ -206,8 +266,8 @@ public class SqliteApplianceRepositoryTest {
                        light.roomId().isPresent() ?
                                light.roomId().get().uuid().toString() : null);
 
-        handle.execute("insert into light(appliance_id, switch_state) values (?, ?)",
-                       light.id().uuid().toString(), light.switchState());
+        handle.execute("insert into light(appliance_id, switch_state, dimmable) values (?, ?, ?)",
+                       light.id().uuid().toString(), light.switchState(), light.dimmable());
         handle.close();
     }
 }

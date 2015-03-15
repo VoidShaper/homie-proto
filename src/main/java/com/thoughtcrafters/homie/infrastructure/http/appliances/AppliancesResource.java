@@ -7,7 +7,12 @@ import io.dropwizard.jersey.PATCH;
 import io.dropwizard.jersey.params.UUIDParam;
 
 import javax.validation.Valid;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -25,7 +30,7 @@ public class AppliancesResource {
 
     @POST
     public Response createAppliance(@Valid NewApplianceRequest request) {
-        Appliance appliance = appliancesApplicationService.createApplianceFrom(request.getType(), request.getName());
+        Appliance appliance = appliancesApplicationService.createApplianceFrom(request.toApplianceCreation());
         return Response.created(UriBuilder.fromPath(appliance.id().uuid().toString()).build())
                        .build();
     }

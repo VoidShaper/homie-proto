@@ -1,9 +1,9 @@
 package com.thoughtcrafters.homie.application;
 
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceCreation;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceRepository;
-import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.properties.PropertyUpdate;
 
 import java.util.List;
@@ -19,8 +19,8 @@ public class AppliancesApplicationService {
         return applianceRepository.getBy(id);
     }
 
-    public Appliance createApplianceFrom(ApplianceType applianceType, String name) {
-        return applianceRepository.createFrom(applianceType, name);
+    public Appliance createApplianceFrom(ApplianceCreation applianceCreation) {
+        return applianceRepository.createFrom(applianceCreation);
     }
 
     public List<Appliance> getAllAppliances() {

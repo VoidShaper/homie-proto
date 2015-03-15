@@ -121,11 +121,12 @@ public abstract class AcceptanceTest {
         return response.getEntity(Map.class);
     }
 
-    public ApplianceId aLightHasBeenCreatedWith(String aName)
+    public ApplianceId aLightHasBeenCreatedWith(String aName, boolean dimmable)
             throws JsonProcessingException {
         String requestEntity = jsonFrom(ImmutableMap.of(
                 "name", aName,
-                "type", "LIGHT"));
+                "type", "LIGHT",
+                "dimmable", dimmable));
 
         ClientResponse response = Client.create()
                                         .resource(appliancesUri().build())

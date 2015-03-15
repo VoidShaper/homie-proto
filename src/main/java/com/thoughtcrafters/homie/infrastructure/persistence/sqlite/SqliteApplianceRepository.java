@@ -1,12 +1,14 @@
 package com.thoughtcrafters.homie.infrastructure.persistence.sqlite;
 
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
+import com.thoughtcrafters.homie.domain.appliances.ApplianceCreation;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceNotFoundException;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceRepository;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceTypeNotSupportedException;
 import com.thoughtcrafters.homie.domain.appliances.lights.Light;
+import com.thoughtcrafters.homie.domain.appliances.lights.LightCreation;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
 import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import org.skife.jdbi.v2.DBI;
@@ -42,20 +44,21 @@ public class SqliteApplianceRepository implements ApplianceRepository {
     }
 
     @Override
-    public Appliance createFrom(ApplianceType applianceType, String name) {
+    public Appliance createFrom(ApplianceCreation creation) {
         ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
         try (Handle handle = sqliteDbi.open()) {
             handle.execute("insert into appliance(appliance_id, name, appliance_type, room_id) values (?, ?, ?, ?)",
-                           applianceId.uuid().toString(), name, applianceType);
-            switch (applianceType) {
+                           applianceId.uuid().toString(), creation.name(), creation.type());
+            switch (creation.type()) {
                 case LIGHT:
-                    handle.execute("insert into light(appliance_id, switch_state) values (?, ?)",
-                                   applianceId.uuid().toString(), SwitchState.OFF.toString());
-                    return new Light(applianceId, name, Optional.<RoomId>empty());
+                    LightCreation lightCreation = (LightCreation) creation;
+                    handle.execute("insert into light(appliance_id, switch_state, dimmable) values (?, ?, ?)",
+                                   applianceId.uuid().toString(), SwitchState.OFF.toString(), lightCreation.dimmable());
+                    return new Light(applianceId, creation.name(), Optional.<RoomId>empty(), lightCreation.dimmable());
             }
         }
         throw new ApplianceTypeNotSupportedException(
-                format("Saving appliance type %s is not supported yet.", applianceType));
+                format("Saving appliance type %s is not supported yet.", creation.type()));
     }
 
     @Override
@@ -105,11 +108,13 @@ public class SqliteApplianceRepository implements ApplianceRepository {
             String roomIdValue = (String) applianceResult.get("room_id");
             RoomId roomId = roomIdValue == null ? null : new RoomId(UUID.fromString(roomIdValue));
             SwitchState switchState = SwitchState.valueOf((String) lightResult.get("switch_State"));
+            boolean dimmable = ((Integer) lightResult.get("dimmable")) == 1;
 
             return new Light(new ApplianceId(UUID.fromString(applianceIdResult)),
                              (String) applianceResult.get("name"),
                              Optional.ofNullable(roomId),
-                             switchState);
+                             switchState,
+                             dimmable);
         }
         throw new ApplianceTypeNotSupportedException(
                 format("Getting appliance of type %s of id %s is not supported yet.",

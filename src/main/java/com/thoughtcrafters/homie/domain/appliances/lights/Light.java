@@ -4,6 +4,7 @@ import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceState;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceType;
+import com.thoughtcrafters.homie.domain.appliances.properties.IntegerProperty;
 import com.thoughtcrafters.homie.domain.appliances.properties.PropertyUpdateNotAvailableException;
 import com.thoughtcrafters.homie.domain.appliances.properties.EnumProperty;
 import com.thoughtcrafters.homie.domain.appliances.properties.PropertyUpdate;
@@ -16,24 +17,40 @@ import java.util.Optional;
 public class Light extends Appliance {
 
     private SwitchState switchState;
+    private int brightness;
+    private boolean dimmable;
 
-    public Light(ApplianceId id, String name, Optional<RoomId> roomId) {
-        this(id, name, roomId, SwitchState.OFF);
+    public Light(ApplianceId id, String name, Optional<RoomId> roomId, boolean dimmable) {
+        this(id, name, roomId, SwitchState.OFF, dimmable);
     }
 
     public Light(ApplianceId id,
                  String name,
                  Optional<RoomId> roomId,
-                 SwitchState switchState) {
+                 SwitchState switchState,
+                 boolean dimmable) {
         super(id, name, roomId);
         this.switchState = switchState;
+        this.dimmable = dimmable;
         properties.add(new EnumProperty("switchState", switchState, Arrays.asList(SwitchState.values()))
                                .describedAs("If the light is on or off.")
                                .whichIsEditable());
+        if (dimmable) {
+            this.brightness = 0;
+            properties.add(new IntegerProperty("brightness", brightness)
+                                   .describedAs("How bright the light is.")
+                                   .withMinimalValue(0)
+                                   .withMaximumValue(100)
+                                   .whichIsEditable());
+        }
     }
 
     public SwitchState switchState() {
         return switchState;
+    }
+
+    public boolean dimmable() {
+        return dimmable;
     }
 
     @Override
@@ -53,7 +70,6 @@ public class Light extends Appliance {
         throw new PropertyUpdateNotAvailableException(id,
                                                       propertyUpdate.name(),
                                                       propertyUpdate.valueAsString());
-
     }
 
     @Override
@@ -61,10 +77,9 @@ public class Light extends Appliance {
         return switchState == SwitchState.OFF ? ApplianceState.IDLE : ApplianceState.WORKING;
     }
 
-
     @Override
     public Appliance copy() {
-        return new Light(id, name, roomId, switchState);
+        return new Light(id, name, roomId, switchState, dimmable);
     }
 
     @Override
@@ -78,6 +93,7 @@ public class Light extends Appliance {
         if (!name().equals(light.name())) return false;
         if (!roomId().equals(light.roomId())) return false;
         if (switchState != light.switchState) return false;
+        if (dimmable != light.dimmable) return false;
 
         return true;
     }
@@ -88,6 +104,7 @@ public class Light extends Appliance {
         result = 31 * result + name().hashCode();
         result = 31 * result + roomId().hashCode();
         result = 31 * result + switchState.hashCode();
+        result = 31 * result + (dimmable ? 1 : 0);
         return result;
     }
 
@@ -97,6 +114,7 @@ public class Light extends Appliance {
                 "id=" + id() +
                 ", name='" + name() + '\'' +
                 ", switchState=" + switchState +
+                ", dimmable=" + dimmable +
                 (roomId().isPresent() ? ", roomId=" + roomId().get() : "") +
                 "}";
     }

@@ -39,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LightsAcceptanceTest extends AcceptanceTest {
 
+    public static final String BRIGHTNESS_DESCRIPTION = "How bright the light is.";
+    public static final String SWITCH_STATE_DESCRIPTION = "If the light is on or off.";
     public static String dbTestFile = "homieTest.db";
 
     @ClassRule
@@ -47,8 +49,6 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                     ConfigOverride.config("dbPath", dbTestFile));
 
     private DBI jdbiConnection = SqliteConnectionFactory.jdbiConnectionTo(dbTestFile);
-
-    public static final String SWITCH_DESCRIPTION = "turn on or off";
 
     @Before
     public void setUp() throws Exception {
@@ -81,9 +81,30 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    public void createsADimmableLightCorrectly() throws JsonProcessingException {
+        // given
+        String requestEntity = jsonFrom(ImmutableMap.of(
+                "name", "testName",
+                "type", "LIGHT",
+                "dimmable", true));
+
+        // when
+        ClientResponse response = Client.create()
+                                        .resource(appliancesUri().build())
+                                        .entity(requestEntity, MediaType.APPLICATION_JSON_TYPE)
+                                        .post(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED_201);
+
+        assertThat(response.getHeaders().getFirst("Location"))
+                .matches(format("%s/%s", appliancesUri().build(), UUID_REGEX));
+    }
+
+    @Test
     public void getsACreatedLightCorrectly() throws JsonProcessingException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName");
+        ApplianceId id = aLightHasBeenCreatedWith("aName", false);
 
         // when
         ClientResponse response = Client.create()
@@ -103,10 +124,51 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                 "switchState",
                                 ImmutableMap.<String, Object>of(
                                         "value", "OFF",
-                                        "description", "If the light is on or off.",
+                                        "description", SWITCH_STATE_DESCRIPTION,
                                         "type", "ENUM",
                                         "editable", true,
                                         "availableValues", ImmutableList.of("ON", "OFF"))
+                        )),
+                        MapEntry.entry("self", "/appliances/" + id.uuid())
+                );
+    }
+
+    @Test
+    public void getsACreatedDimmableLightCorrectly() throws JsonProcessingException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName", true);
+
+        // when
+        ClientResponse response = Client.create()
+                                        .resource(appliancesUri(id).build())
+                                        .get(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
+
+        assertThat(response.getEntity(Map.class))
+                .containsOnly(
+                        MapEntry.entry("id", id.uuid().toString()),
+                        MapEntry.entry("state", "IDLE"),
+                        MapEntry.entry("name", "aName"),
+                        MapEntry.entry("type", "LIGHT"),
+                        MapEntry.entry("properties", ImmutableMap.<String, Object>of(
+                                "switchState",
+                                ImmutableMap.<String, Object>of(
+                                        "value", "OFF",
+                                        "description", SWITCH_STATE_DESCRIPTION,
+                                        "type", "ENUM",
+                                        "editable", true,
+                                        "availableValues", ImmutableList.of("ON", "OFF")),
+                                "brightness",
+                                ImmutableMap.builder()
+                                            .put("value", 0)
+                                            .put("description", BRIGHTNESS_DESCRIPTION)
+                                            .put("type", "INTEGER")
+                                            .put("editable", true)
+                                            .put("min", 0)
+                                            .put("max", 100)
+                                            .build()
                         )),
                         MapEntry.entry("self", "/appliances/" + id.uuid())
                 );
@@ -168,7 +230,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void turnsTheLightOnWithAnUpdate() throws IOException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName");
+        ApplianceId id = aLightHasBeenCreatedWith("aName", false);
 
         // when
         CloseableHttpResponse response = aLightHasBeenTurnedTo(id, SwitchState.ON);
@@ -180,7 +242,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                         "switchState",
                         ImmutableMap.<String, Object>of(
                                 "value", "ON",
-                                "description", "If the light is on or off.",
+                                "description", SWITCH_STATE_DESCRIPTION,
                                 "type", "ENUM",
                                 "editable", true,
                                 "availableValues", ImmutableList.of("ON", "OFF"))
@@ -192,7 +254,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void turnsTheLightOffWithAnUpdate() throws IOException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName");
+        ApplianceId id = aLightHasBeenCreatedWith("aName", false);
         aLightHasBeenTurnedTo(id, SwitchState.ON);
 
         // when
@@ -205,7 +267,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                         "switchState",
                         ImmutableMap.<String, Object>of(
                                 "value", "OFF",
-                                "description", "If the light is on or off.",
+                                "description", SWITCH_STATE_DESCRIPTION,
                                 "type", "ENUM",
                                 "editable", true,
                                 "availableValues", ImmutableList.of("ON", "OFF"))
@@ -216,7 +278,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void triedToUpdateSwitchStateToAnUnknownValue() throws IOException {
         // given
-        ApplianceId id = aLightHasBeenCreatedWith("aName");
+        ApplianceId id = aLightHasBeenCreatedWith("aName", false);
 
         // when
         CloseableHttpResponse response = aLightHasBeenTurnedTo(id, "OFS");
@@ -231,7 +293,7 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                         "switchState",
                         ImmutableMap.<String, Object>of(
                                 "value", "OFF",
-                                "description", "If the light is on or off.",
+                                "description", SWITCH_STATE_DESCRIPTION,
                                 "type", "ENUM",
                                 "editable", true,
                                 "availableValues", ImmutableList.of("ON", "OFF"))
@@ -258,8 +320,8 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Test
     public void getsBothAddedAppliancesWhenGettingAll() throws JsonProcessingException {
         // given
-        ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLight");
-        ApplianceId secondLightOffId = aLightHasBeenCreatedWith("secondLight");
+        ApplianceId lightOffId = aLightHasBeenCreatedWith("firstLight", false);
+        ApplianceId secondLightOffId = aLightHasBeenCreatedWith("secondLight", true);
 
         // when
         ClientResponse response = Client.create()
@@ -275,11 +337,11 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                     .put("id", lightOffId.uuid().toString())
                                     .put("state", "IDLE")
                                     .put("type", "LIGHT")
-                                    .put("properties", ImmutableMap.<String, Object>of(
+                                    .put("properties", ImmutableMap.of(
                                             "switchState",
-                                            ImmutableMap.<String, Object>of(
+                                            ImmutableMap.of(
                                                     "value", "OFF",
-                                                    "description", "If the light is on or off.",
+                                                    "description", SWITCH_STATE_DESCRIPTION,
                                                     "type", "ENUM",
                                                     "editable", true,
                                                     "availableValues", ImmutableList.of("ON", "OFF"))
@@ -291,14 +353,23 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                     .put("id", secondLightOffId.uuid().toString())
                                     .put("state", "IDLE")
                                     .put("type", "LIGHT")
-                                    .put("properties", ImmutableMap.<String, Object>of(
+                                    .put("properties", ImmutableMap.of(
                                             "switchState",
-                                            ImmutableMap.<String, Object>of(
+                                            ImmutableMap.of(
                                                     "value", "OFF",
-                                                    "description", "If the light is on or off.",
+                                                    "description", SWITCH_STATE_DESCRIPTION,
                                                     "type", "ENUM",
                                                     "editable", true,
-                                                    "availableValues", ImmutableList.of("ON", "OFF"))
+                                                    "availableValues", ImmutableList.of("ON", "OFF")),
+                                            "brightness",
+                                            ImmutableMap.builder()
+                                                        .put("value", 0)
+                                                        .put("description", BRIGHTNESS_DESCRIPTION)
+                                                        .put("type", "INTEGER")
+                                                        .put("editable", true)
+                                                        .put("min", 0)
+                                                        .put("max", 100)
+                                                        .build()
                                     ))
                                     .put("self", "/appliances/" + secondLightOffId.uuid())
                                     .build()
