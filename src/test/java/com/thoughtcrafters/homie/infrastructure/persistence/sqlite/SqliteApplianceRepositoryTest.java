@@ -102,7 +102,7 @@ public class SqliteApplianceRepositoryTest {
                 .containsOnly(
                         MapEntry.entry("appliance_id", appliance.id().uuid().toString()),
                         MapEntry.entry("switch_state", "OFF"),
-                        MapEntry.entry("dimmable", 0)
+                        MapEntry.entry("brightness", null)
                 );
     }
 
@@ -127,7 +127,7 @@ public class SqliteApplianceRepositoryTest {
                 .containsOnly(
                         MapEntry.entry("appliance_id", appliance.id().uuid().toString()),
                         MapEntry.entry("switch_state", "OFF"),
-                        MapEntry.entry("dimmable", 1)
+                        MapEntry.entry("brightness", 0)
                 );
     }
 
@@ -179,7 +179,11 @@ public class SqliteApplianceRepositoryTest {
         // given
         ApplianceId applianceId = new ApplianceId(UUID.randomUUID());
         Light aLight =
-                new Light(applianceId, "aLight", Optional.of(new RoomId(UUID.randomUUID())), SwitchState.ON, false);
+                new Light(applianceId,
+                          "aLight",
+                          Optional.of(new RoomId(UUID.randomUUID())),
+                          SwitchState.ON,
+                          Optional.<Integer>empty());
         creationWasCalledFor(aLight);
 
         // when
@@ -197,13 +201,13 @@ public class SqliteApplianceRepositoryTest {
                           "aLight",
                           Optional.of(new RoomId(UUID.randomUUID())),
                           SwitchState.ON,
-                          false);
+                          Optional.<Integer>empty());
         Light aLight2 =
                 new Light(new ApplianceId(UUID.randomUUID()),
                           "anotherLight",
                           Optional.empty(),
                           SwitchState.OFF,
-                          true);
+                          Optional.of(50));
         creationWasCalledFor(aLight1);
         creationWasCalledFor(aLight2);
 
@@ -223,7 +227,7 @@ public class SqliteApplianceRepositoryTest {
                           "aLightApplianceName",
                           Optional.empty(),
                           SwitchState.OFF,
-                          false);
+                          Optional.<Integer>empty());
 
         creationWasCalledFor(aLight);
 
@@ -231,6 +235,7 @@ public class SqliteApplianceRepositoryTest {
         RoomId roomId = new RoomId(UUID.randomUUID());
         aLight.placeInTheRoomWith(roomId);
         Whitebox.setInternalState(aLight, "switchState", SwitchState.ON);
+        Whitebox.setInternalState(aLight, "brightness", Optional.of(79));
         sqliteApplianceRepository.save(aLight);
 
         // then
@@ -247,7 +252,7 @@ public class SqliteApplianceRepositoryTest {
                 .containsOnly(
                         MapEntry.entry("appliance_id", aLight.id().uuid().toString()),
                         MapEntry.entry("switch_state", "ON"),
-                        MapEntry.entry("dimmable", 0)
+                        MapEntry.entry("brightness", 79)
                 );
 
     }
@@ -266,8 +271,10 @@ public class SqliteApplianceRepositoryTest {
                        light.roomId().isPresent() ?
                                light.roomId().get().uuid().toString() : null);
 
-        handle.execute("insert into light(appliance_id, switch_state, dimmable) values (?, ?, ?)",
-                       light.id().uuid().toString(), light.switchState(), light.dimmable());
+        handle.execute("insert into light(appliance_id, switch_state, brightness) values (?, ?, ?)",
+                       light.id().uuid().toString(),
+                       light.switchState(),
+                       light.brightness().isPresent() ? light.brightness().get() : null);
         handle.close();
     }
 }

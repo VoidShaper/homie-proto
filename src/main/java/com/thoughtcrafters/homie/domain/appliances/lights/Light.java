@@ -17,27 +17,25 @@ import java.util.Optional;
 public class Light extends Appliance {
 
     private SwitchState switchState;
-    private int brightness;
-    private boolean dimmable;
+    private Optional<Integer> brightness;
 
     public Light(ApplianceId id, String name, Optional<RoomId> roomId, boolean dimmable) {
-        this(id, name, roomId, SwitchState.OFF, dimmable);
+        this(id, name, roomId, SwitchState.OFF, dimmable ? Optional.of(0) : Optional.<Integer>empty());
     }
 
     public Light(ApplianceId id,
                  String name,
                  Optional<RoomId> roomId,
                  SwitchState switchState,
-                 boolean dimmable) {
+                 Optional<Integer> brightness) {
         super(id, name, roomId);
         this.switchState = switchState;
-        this.dimmable = dimmable;
         properties.add(new EnumProperty("switchState", switchState, Arrays.asList(SwitchState.values()))
                                .describedAs("If the light is on or off.")
                                .whichIsEditable());
-        if (dimmable) {
-            this.brightness = 0;
-            properties.add(new IntegerProperty("brightness", brightness)
+        this.brightness = brightness;
+        if (this.brightness.isPresent()) {
+            properties.add(new IntegerProperty("brightness", brightness.orElse(0))
                                    .describedAs("How bright the light is.")
                                    .withMinimalValue(0)
                                    .withMaximumValue(100)
@@ -49,8 +47,8 @@ public class Light extends Appliance {
         return switchState;
     }
 
-    public boolean dimmable() {
-        return dimmable;
+    public Optional<Integer> brightness() {
+        return brightness;
     }
 
     @Override
@@ -79,7 +77,7 @@ public class Light extends Appliance {
 
     @Override
     public Appliance copy() {
-        return new Light(id, name, roomId, switchState, dimmable);
+        return new Light(id, name, roomId, switchState, brightness);
     }
 
     @Override
@@ -92,8 +90,8 @@ public class Light extends Appliance {
         if (!id().equals(light.id())) return false;
         if (!name().equals(light.name())) return false;
         if (!roomId().equals(light.roomId())) return false;
+        if (!brightness.equals(light.brightness)) return false;
         if (switchState != light.switchState) return false;
-        if (dimmable != light.dimmable) return false;
 
         return true;
     }
@@ -104,7 +102,7 @@ public class Light extends Appliance {
         result = 31 * result + name().hashCode();
         result = 31 * result + roomId().hashCode();
         result = 31 * result + switchState.hashCode();
-        result = 31 * result + (dimmable ? 1 : 0);
+        result = 31 * result + brightness.hashCode();
         return result;
     }
 
@@ -114,7 +112,7 @@ public class Light extends Appliance {
                 "id=" + id() +
                 ", name='" + name() + '\'' +
                 ", switchState=" + switchState +
-                ", dimmable=" + dimmable +
+                (brightness.isPresent() ? ", brightness=" + brightness.get() : "") +
                 (roomId().isPresent() ? ", roomId=" + roomId().get() : "") +
                 "}";
     }

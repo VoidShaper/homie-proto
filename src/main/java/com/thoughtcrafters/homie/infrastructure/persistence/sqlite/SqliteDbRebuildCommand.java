@@ -37,7 +37,7 @@ public class SqliteDbRebuildCommand extends ConfiguredCommand<HomieConfiguration
             );
 
             h.execute("create table light (appliance_id text primary key, switch_state text not null,"
-                              + " dimmable integer not null,"
+                              + " brightness integer,"
                               + " foreign key(appliance_id) references appliance(appliance_id))");
 
             h.execute("create table shape_point (shape_point_id integer primary key,"

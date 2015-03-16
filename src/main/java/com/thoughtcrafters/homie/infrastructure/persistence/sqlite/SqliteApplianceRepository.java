@@ -52,8 +52,10 @@ public class SqliteApplianceRepository implements ApplianceRepository {
             switch (creation.type()) {
                 case LIGHT:
                     LightCreation lightCreation = (LightCreation) creation;
-                    handle.execute("insert into light(appliance_id, switch_state, dimmable) values (?, ?, ?)",
-                                   applianceId.uuid().toString(), SwitchState.OFF.toString(), lightCreation.dimmable());
+                    handle.execute("insert into light(appliance_id, switch_state, brightness) values (?, ?, ?)",
+                                   applianceId.uuid().toString(),
+                                   SwitchState.OFF.toString(),
+                                   lightCreation.dimmable() ? 0 : null);
                     return new Light(applianceId, creation.name(), Optional.<RoomId>empty(), lightCreation.dimmable());
             }
         }
@@ -70,8 +72,9 @@ public class SqliteApplianceRepository implements ApplianceRepository {
             switch (appliance.type()) {
                 case LIGHT:
                     Light light = (Light) appliance;
-                    handle.execute("update light set switch_state = ? where appliance_id = ?",
+                    handle.execute("update light set switch_state = ?, brightness = ? where appliance_id = ?",
                                    light.switchState(),
+                                   light.brightness().isPresent() ? light.brightness().get() : null,
                                    appliance.id().uuid());
                     return;
                 default:
@@ -108,13 +111,14 @@ public class SqliteApplianceRepository implements ApplianceRepository {
             String roomIdValue = (String) applianceResult.get("room_id");
             RoomId roomId = roomIdValue == null ? null : new RoomId(UUID.fromString(roomIdValue));
             SwitchState switchState = SwitchState.valueOf((String) lightResult.get("switch_State"));
-            boolean dimmable = ((Integer) lightResult.get("dimmable")) == 1;
+
+            Integer brightness = (Integer) lightResult.get("brightness");
 
             return new Light(new ApplianceId(UUID.fromString(applianceIdResult)),
                              (String) applianceResult.get("name"),
                              Optional.ofNullable(roomId),
                              switchState,
-                             dimmable);
+                             Optional.ofNullable(brightness));
         }
         throw new ApplianceTypeNotSupportedException(
                 format("Getting appliance of type %s of id %s is not supported yet.",
