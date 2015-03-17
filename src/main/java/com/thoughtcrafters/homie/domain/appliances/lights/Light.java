@@ -16,6 +16,8 @@ import java.util.Optional;
 
 public class Light extends Appliance {
 
+    public static final int MIN_BRIGHTNESS = 0;
+    public static final int MAX_BRIGHTNESS = 100;
     private SwitchState switchState;
     private Optional<Integer> brightness;
 
@@ -37,8 +39,8 @@ public class Light extends Appliance {
         if (this.brightness.isPresent()) {
             properties.add(new IntegerProperty("brightness", brightness.orElse(0))
                                    .describedAs("How bright the light is.")
-                                   .withMinimalValue(0)
-                                   .withMaximumValue(100)
+                                   .withMinimalValue(MIN_BRIGHTNESS)
+                                   .withMaximumValue(MAX_BRIGHTNESS)
                                    .whichIsEditable());
         }
     }
@@ -65,9 +67,28 @@ public class Light extends Appliance {
             this.switchState = SwitchState.valueOf(propertyUpdate.valueAsString());
             return;
         }
+        else if (propertyUpdate.name().equals("brightness")
+                && brightness.isPresent()
+                && validBrightnessValueIsContainedIn(propertyUpdate)) {
+            Integer value = Integer.valueOf(propertyUpdate.valueAsString());
+            brightness = Optional.of(value);
+            return;
+        }
         throw new PropertyUpdateNotAvailableException(id,
                                                       propertyUpdate.name(),
                                                       propertyUpdate.valueAsString());
+    }
+
+    private boolean validBrightnessValueIsContainedIn(PropertyUpdate propertyUpdate) {
+        try {
+            int value = Integer.parseInt(propertyUpdate.valueAsString());
+            if(value < MIN_BRIGHTNESS || value > MAX_BRIGHTNESS) {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     @Override

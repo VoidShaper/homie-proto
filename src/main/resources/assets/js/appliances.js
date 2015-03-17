@@ -43,7 +43,7 @@ angular.module('homieApp')
                 data: {
                     op: "replace",
                     path: "/" + propertyName,
-                    value: propertyValue
+                    value: "" + propertyValue
                 }
             })
                 .success(function (data, status, headers, config) {

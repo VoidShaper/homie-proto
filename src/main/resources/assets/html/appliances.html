@@ -21,8 +21,15 @@
                             ng-options="type for type in applianceTypes" id="applianceType"
                             type="text" ng-model="appliance.type" class="form-control"></select>
                 </div>
+                <div class="form-group" ng-if="appliance.type == 'LIGHT'">
+                    <label for="dimmable">Dimmable</label>
+                    <input type="checkbox" id="dimmable" ng-model="appliance.dimmable">
+                </div>
                 <button class="btn btn-primary" ng-click="newAppliance()">Create Appliance</button>
             </form>
+        </div>
+        <div>
+            <pre>{{appliance}}</pre>
         </div>
     </div>
 </div>

@@ -301,6 +301,101 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                 .containsEntry("state", "IDLE");
     }
 
+    @Test
+    public void changesTheBrightness() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName", true);
+
+        // when
+        CloseableHttpResponse response = aBrightnessHasBeenChangedTo(id, 63);
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT_204);
+        int value = 63;
+        assertThat((Map<String, Object>) aLightResponseFor(id).get("properties"))
+                .containsEntry(
+                        "brightness",
+                        brightnessPropertyForValue(value)
+                );
+    }
+
+    @Test
+    public void changesTheBrightnessOfANonDimmableLight() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName", false);
+
+        // when
+        CloseableHttpResponse response = aBrightnessHasBeenChangedTo(id, 54);
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+        assertThat(EntityUtils.toString(response.getEntity()))
+                .isEqualTo(format("Appliance %s does not support update of the property %s to %s",
+                                  id.uuid(), "brightness", "54"));
+        assertThat((Map<String, Object>) aLightResponseFor(id).get("properties"))
+                .doesNotContainKey("brightness");
+    }
+
+    @Test
+    public void changesTheBrightnessToNonInValue() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName", true);
+
+        // when
+        CloseableHttpResponse response = aBrightnessHasBeenChangedTo(id, "123nonInt123");
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+        assertThat(EntityUtils.toString(response.getEntity()))
+                .isEqualTo(format("Appliance %s does not support update of the property %s to %s",
+                                  id.uuid(), "brightness", "123nonInt123"));
+        assertThat((Map<String, Object>) aLightResponseFor(id).get("properties"))
+                .containsEntry(
+                        "brightness",
+                        brightnessPropertyForValue(0)
+                );
+    }
+
+    @Test
+    public void changesTheBrightnessToLessThanMinValue() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName", true);
+
+        // when
+        CloseableHttpResponse response = aBrightnessHasBeenChangedTo(id, -1);
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+        assertThat(EntityUtils.toString(response.getEntity()))
+                .isEqualTo(format("Appliance %s does not support update of the property %s to %s",
+                                  id.uuid(), "brightness", "-1"));
+        assertThat((Map<String, Object>) aLightResponseFor(id).get("properties"))
+                .containsEntry(
+                        "brightness",
+                        brightnessPropertyForValue(0)
+                );
+    }
+
+    @Test
+    public void changesTheBrightnessToMoreThanMaxValue() throws IOException {
+        // given
+        ApplianceId id = aLightHasBeenCreatedWith("aName", true);
+
+        // when
+        CloseableHttpResponse response = aBrightnessHasBeenChangedTo(id, 101);
+
+        // then
+        assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST_400);
+        assertThat(EntityUtils.toString(response.getEntity()))
+                .isEqualTo(format("Appliance %s does not support update of the property %s to %s",
+                                  id.uuid(), "brightness", "101"));
+        assertThat((Map<String, Object>) aLightResponseFor(id).get("properties"))
+                .containsEntry(
+                        "brightness",
+                        brightnessPropertyForValue(0)
+                );
+    }
+
     private CloseableHttpResponse aLightHasBeenTurnedTo(ApplianceId id, SwitchState switchState) throws IOException {
         return aLightHasBeenTurnedTo(id, switchState.toString());
     }
@@ -309,6 +404,22 @@ public class LightsAcceptanceTest extends AcceptanceTest {
         ImmutableMap<String, Object> request = ImmutableMap.of("op", "replace",
                                                                "path", "/switchState",
                                                                "value", switchState);
+
+        HttpPatch httpPatch = new HttpPatch(appliancesUri(id).build());
+        httpPatch.setEntity(new StringEntity(jsonFrom(request)));
+        httpPatch.addHeader("Content-Type", "application/json-patch+json");
+
+        return HttpClients.createDefault().execute(httpPatch);
+    }
+
+    private CloseableHttpResponse aBrightnessHasBeenChangedTo(ApplianceId id, Integer brightness) throws IOException {
+        return aBrightnessHasBeenChangedTo(id, "" + brightness);
+    }
+
+    private CloseableHttpResponse aBrightnessHasBeenChangedTo(ApplianceId id, String brightness) throws IOException {
+        ImmutableMap<String, Object> request = ImmutableMap.of("op", "replace",
+                                                               "path", "/brightness",
+                                                               "value", brightness);
 
         HttpPatch httpPatch = new HttpPatch(appliancesUri(id).build());
         httpPatch.setEntity(new StringEntity(jsonFrom(request)));
@@ -379,5 +490,16 @@ public class LightsAcceptanceTest extends AcceptanceTest {
     @Override
     public DropwizardAppRule<HomieConfiguration> app() {
         return app;
+    }
+
+    private ImmutableMap<String, Object> brightnessPropertyForValue(int value) {
+        return ImmutableMap.<String, Object>builder()
+                           .put("value", value)
+                           .put("description", BRIGHTNESS_DESCRIPTION)
+                           .put("type", "INTEGER")
+                           .put("editable", true)
+                           .put("min", 0)
+                           .put("max", 100)
+                           .build();
     }
 }
