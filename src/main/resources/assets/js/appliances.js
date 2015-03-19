@@ -33,9 +33,9 @@ angular.module('homieApp')
                 });
         };
 
-        $scope.updateProperty = function (appliance, propertyName, propertyValue) {
+        $scope.updateProperty = function (applianceUrl, propertyName, propertyValue) {
             $http({
-                url: appliance.self,
+                url: applianceUrl,
                 method: "PATCH",
                 headers: {
                     'Content-Type': "application/json-patch+json"

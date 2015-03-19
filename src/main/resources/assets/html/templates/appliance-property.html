@@ -1,0 +1,32 @@
+<div>
+    <div><strong>{{ propertyName }}</strong>: {{ property.value }}</div>
+    <div><strong>description</strong>: {{ property.description }}</div>
+
+    <div ng-if="property.editable">
+        <div ng-if="property.type == 'INTEGER'">
+            <label for="{{propertyName}}Input">Value</label>
+            <input id="{{propertyName}}Input" type="number"
+                   min="property.min" max="property.max" ng-model="property.value"
+                   class="form-control" ng-change="updateProperty(applianceUrl, propertyName, property.value)"/>
+        </div>
+        <div ng-if="property.type == 'ENUM'">
+            <div ng-if="property.availableValues.length > 3">
+                <select ng-options="enumValue for enumValue in operation.enumValues"
+                        ng-model="property.value">
+
+                </select>
+                <button class="btn btn-link">perform</button>
+            </div>
+
+            <div ng-if="property.availableValues.length <= 3">
+                <button class="btn btn-default"
+                        ng-model="property.value"
+                        ng-repeat="availableValue in property.availableValues"
+                        btn-radio="availableValue"
+                        ng-click="updateProperty(applianceUrl, propertyName, availableValue)">
+                    {{ availableValue }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

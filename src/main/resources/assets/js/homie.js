@@ -20,6 +20,18 @@ angular.module('homieApp')
             templateUrl: '/html/templates/appliances-tab.html'
         };
     })
+    .directive("applianceproperty", function() {
+        return {
+            restrict: 'E',
+            scope: {
+                applianceUrl: '=',
+                propertyName: '=',
+                property: '=',
+                updateProperty: '='
+            },
+            templateUrl: "/html/templates/appliance-property.html"
+        }
+    })
     .directive("roomshape", function () {
         return {
             restrict: "E",

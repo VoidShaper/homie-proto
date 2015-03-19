@@ -63,7 +63,6 @@ public class Light extends Appliance {
         if (propertyUpdate.name().equals("switchState") &&
                 (propertyUpdate.valueAsString().equals("ON"))
                 || propertyUpdate.valueAsString().equals("OFF")) {
-
             this.switchState = SwitchState.valueOf(propertyUpdate.valueAsString());
             return;
         }
