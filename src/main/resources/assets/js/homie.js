@@ -36,6 +36,23 @@ angular.module('homieApp')
             templateUrl: "/html/templates/appliance-property.html"
         }
     })
+    .directive("conciseApplianceProperty", function() {
+        var conciseAppPropertyIndex = 0;
+        return {
+            restrict: 'E',
+            scope: {
+                applianceUrl: '=',
+                propertyName: '=',
+                property: '=',
+                updateProperty: '='
+            },
+            templateUrl: "/html/templates/appliance-property-concise.html",
+            link: function (scope, element, attrs) {
+                scope.index = conciseAppPropertyIndex;
+                conciseAppPropertyIndex++;
+            }
+        }
+    })
     .directive("applianceInfo", function () {
         return {
             restrict: 'E',

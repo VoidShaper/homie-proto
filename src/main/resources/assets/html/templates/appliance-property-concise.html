@@ -1,0 +1,28 @@
+<div tooltip="{{ property.description }}" class="form-horizontal">
+
+    <div ng-if="property.editable" class="form-group row">
+        <label for="{{ propertyName }}{{ index }}" class="control-label col-xs-5">{{ propertyName }}:</label>
+        <div ng-if="property.type == 'INTEGER'" class="col-xs-5">
+            <div >
+                <input type="number" id="{{ propertyName }}{{ index }}"
+                       ng-model="property.value" class="form-control"
+                       ng-model-options="{ debounce: 500 }"
+                       ng-change="updateProperty(applianceUrl, propertyName, property.value)"/>
+            </div>
+        </div>
+        <div ng-if="property.type == 'ENUM'" class="col-xs-6">
+            <div ng-if="property.availableValues.length <= 3" class="btn-group" id="{{propertyName}}{{index}}">
+                <button class="btn btn-default"
+                        ng-model="property.value"
+                        ng-repeat="availableValue in property.availableValues"
+                        btn-radio="availableValue"
+                        ng-click="updateProperty(applianceUrl, propertyName, availableValue)">
+                    {{ availableValue }}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div ng-if="!property.editable">
+        <span tooltip="{{ property.description }}"><strong>{{ propertyName }}</strong>: {{ property.value }}</span>
+    </div>
+</div>
