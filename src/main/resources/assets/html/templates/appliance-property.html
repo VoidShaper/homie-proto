@@ -7,7 +7,9 @@
             <label for="{{propertyName}}Input">Value</label>
             <input id="{{propertyName}}Input" type="number"
                    min="property.min" max="property.max" ng-model="property.value"
-                   class="form-control" ng-change="updateProperty(applianceUrl, propertyName, property.value)"/>
+                   class="form-control"
+                   ng-model-options="{ debounce: 300 }"
+                   ng-change="updateProperty(applianceUrl, propertyName, property.value)"/>
         </div>
         <div ng-if="property.type == 'ENUM'">
             <div ng-if="property.availableValues.length > 3">
