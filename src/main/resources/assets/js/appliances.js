@@ -44,21 +44,20 @@ angular.module('homieApp')
                     op: "replace",
                     path: "/" + propertyName,
                     value: "" + propertyValue
-                }
-            })
-                .success(function (data, status, headers, config) {
-                    $scope.alerts = [{
-                        "msg": "Http Status: " + status,
-                        "type": "success"
-                    }];
-                    $scope.getAllAppliances();
-                })
-                .error(function (data, status, headers, config) {
-                    $scope.alerts = [{
-                        "msg": "Http Status: " + status + " Error: " + angular.toJson(data),
-                        "type": "danger"
-                    }];
-                });
+                },
+                transformResponse: []
+            }).success(function (data, status, headers, config) {
+                $scope.alerts = [{
+                    "msg": "Http Status: " + status,
+                    "type": "success"
+                }];
+                $scope.getAllAppliances();
+            }).error(function (data, status, headers, config) {
+                $scope.alerts = [{
+                    "msg": "Http Status: " + status + " Error: " + data || "",
+                    "type": "danger"
+                }];
+            });
         };
 
         $scope.closeAlert = function (index) {
