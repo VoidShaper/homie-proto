@@ -8,7 +8,9 @@
         <th class="col-md-3">Properties</th>
     </tr>
     <tr ng-repeat="appliance in appliances">
-        <td>{{appliance.id}}</td>
+        <td>
+            <div appliance-popover appliance="appliance" update-property="updateProperty">{{appliance.id}}</div>
+        </td>
         <td>{{appliance.name}}</td>
         <td>{{appliance.type}}</td>
         <td>{{appliance.state}}</td>

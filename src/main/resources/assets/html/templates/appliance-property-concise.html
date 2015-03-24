@@ -11,7 +11,7 @@
             </div>
         </div>
         <div ng-if="property.type == 'ENUM'" class="col-xs-6">
-            <div ng-if="property.availableValues.length <= 3" class="btn-group" id="{{propertyName}}{{index}}">
+            <div ng-if="property.availableValues.length <= 3" class="btn-group" id="{{propertyName}}{{index}}" style="white-space: nowrap">
                 <button class="btn btn-default"
                         ng-model="property.value"
                         ng-repeat="availableValue in property.availableValues"

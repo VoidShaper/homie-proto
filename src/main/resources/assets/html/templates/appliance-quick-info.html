@@ -1,0 +1,23 @@
+<ul class="list-group">
+    <li class="list-group-item list-group-item-heading">
+        <div style="font-size: 115%;">
+            <span class="glyphicon {{iconOf(appliance.type)}}" aria-hidden="true"
+                  tooltip-html-unsafe="Type: <b>{{appliance.type}}</b>">
+            </span>
+            <strong>{{appliance.name}}</strong>
+        </div>
+        <div disabled style="font-size: 70%; color: gray;">{{appliance.id}}</div>
+    </li>
+    <li class="list-group-item">
+        <strong>state:</strong> {{appliance.state}}
+    </li>
+    <li class="list-group-item">
+        <strong>roomID:</strong> <a href="#/rooms/{{appliance.roomId}}">{{appliance.roomId}}</a>
+    </li>
+    <li ng-repeat="(propertyName, property) in appliance.properties" class="list-group-item">
+        <concise-appliance-property appliance-url="appliance.self" property="property"
+                                    property-name="propertyName" update-property="updateProperty">
+
+        </concise-appliance-property>
+    </li>
+</ul>

@@ -14,6 +14,32 @@ angular.module('homieApp')
             templateUrl: '/html/test.html'
         };
     })
+    .directive('appliancePopover', function ($compile) {
+        var quickInfoTemplate =
+            "<appliance-quick-info appliance='appliance' update-property='updateProperty'></appliance-quick-info>";
+
+        return {
+            restrict: "A",
+            link: function (scope, element, attrs) {
+                scope.placement = scope.placement || "right";
+                var popOverContent = $compile(quickInfoTemplate)(scope);
+                var options = {
+                    content: popOverContent,
+                    placement: scope.placement,
+                    html: true
+                };
+                $(element).popover(options)
+                    .click(function (e) {
+                        $(this).popover('show');
+                    });
+            },
+            scope: {
+                appliance: '=',
+                updateProperty: '=',
+                placement: '@?'
+            }
+        };
+    })
     .directive("appliancesTab", function () {
         return {
             restrict: 'E',
@@ -24,7 +50,7 @@ angular.module('homieApp')
             templateUrl: '/html/templates/appliances-tab.html'
         };
     })
-    .directive("applianceProperty", function() {
+    .directive("applianceProperty", function () {
         return {
             restrict: 'E',
             scope: {
@@ -36,7 +62,7 @@ angular.module('homieApp')
             templateUrl: "/html/templates/appliance-property.html"
         }
     })
-    .directive("conciseApplianceProperty", function() {
+    .directive("conciseApplianceProperty", function () {
         var conciseAppPropertyIndex = 0;
         return {
             restrict: 'E',
@@ -53,16 +79,38 @@ angular.module('homieApp')
             }
         }
     })
-    .directive("applianceInfo", function () {
+    .directive("applianceQuickInfo", function () {
         return {
             restrict: 'E',
-            templateUrl: '/html/templates/appliance-info.html'
+            scope: {
+                appliance: '=',
+                updateProperty: '='
+            },
+            templateUrl: '/html/templates/appliance-quick-info.html',
+            controller: function ($scope, $element, $http) {
+                $scope.updateInfo = function () {
+                    $http.get($scope.appliance.self)
+                        .success(function (data, status, headers, config) {
+                            $scope.appliance = data;
+                        })
+                        .error(function (data, status, headers, config) {
+                            alert('error getting appliance ' + status);
+                        });
+                }
+
+                $scope.iconOf = function (type) {
+                    if (type == 'LIGHT') {
+                        return 'glyphicon-lamp';
+                    }
+                    return 'glyphicon-question-sign';
+                }
+            }
         };
     })
     .directive("roomShape", function () {
         return {
             restrict: "E",
-            scope:  {
+            scope: {
                 width: "@",
                 height: "@",
                 room: "=",
@@ -84,10 +132,10 @@ angular.module('homieApp')
 
                 function draw(ctx, room, newplacement) {
                     drawShape(ctx, room.shape);
-                    if(newplacement && newplacement.started) {
+                    if (newplacement && newplacement.started) {
                         drawAppliance(ctx, newplacement.data.applianceId, newplacement.data.point, 'gray');
                     }
-                    if(scope.view == "full") {
+                    if (scope.view == "full") {
                         drawAppliances(ctx, room.appliances);
                     }
                 };
@@ -105,7 +153,7 @@ angular.module('homieApp')
                 }
 
                 function drawAppliances(ctx, appliances) {
-                    angular.forEach(appliances, function(placement, applianceId) {
+                    angular.forEach(appliances, function (placement, applianceId) {
                         drawAppliance(ctx, applianceId, placement.point, 'black');
                     });
                 };
@@ -129,7 +177,7 @@ angular.module('homieApp')
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     draw(ctx, newRoom, scope.newPlacement);
                 }, true);
-                if(scope.newPlacement) {
+                if (scope.newPlacement) {
                     scope.$watch('newPlacement', function (newplacement) {
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         draw(ctx, scope.room, newplacement);

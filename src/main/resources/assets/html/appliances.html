@@ -8,7 +8,8 @@
 
         <div class="panel-body">
             <alert ng-repeat="alert in alerts"
-                   type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}
+                   type="{{alert.type}}" close="closeAlert($index)">
+                {{alert.msg}}
             </alert>
             <form novalidate>
                 <div class="form-group">
