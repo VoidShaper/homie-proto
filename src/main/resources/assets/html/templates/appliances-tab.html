@@ -4,22 +4,34 @@
         <th class="col-md-1">Name</th>
         <th class="col-md-1">Type</th>
         <th class="col-md-1">State</th>
-        <th class="col-md-2">RoomId</th>
+        <th class="col-md-2">Room</th>
         <th class="col-md-3">Properties</th>
     </tr>
     <tr ng-repeat="appliance in appliances">
         <td>
-            <div appliance-popover appliance="appliance" update-property="updateProperty">{{appliance.id}}</div>
+            <div appliance-popover appliance="appliance" update-property="updateProperty"
+                 style="cursor: pointer; text-decoration: underline">{{appliance.id}}
+            </div>
         </td>
         <td>{{appliance.name}}</td>
         <td>{{appliance.type}}</td>
         <td>{{appliance.state}}</td>
-        <td><a href="#/rooms/{{appliance.roomId}}">{{appliance.roomId}}</a></td>
+        <td>
+            <div ng-show="appliance.room">
+                <a href="#{{appliance.room.self}}"
+                   tooltip="room id: {{appliance.room.id}}">
+                    {{appliance.room.name}}
+                </a>
+            </div>
+            <div ng-show="!appliance.room">
+                Not placed in any room
+            </div>
+        </td>
         <td>
             <ul class="list-group">
                 <li ng-repeat="(propertyName, property) in appliance.properties" class="list-group-item">
                     <concise-appliance-property appliance-url="appliance.self" property="property"
-                                       property-name="propertyName" update-property="updateProperty">
+                                                property-name="propertyName" update-property="updateProperty">
 
                     </concise-appliance-property>
                 </li>

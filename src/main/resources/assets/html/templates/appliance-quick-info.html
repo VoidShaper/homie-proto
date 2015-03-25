@@ -12,7 +12,16 @@
         <strong>state:</strong> {{appliance.state}}
     </li>
     <li class="list-group-item">
-        <strong>roomID:</strong> <a href="#/rooms/{{appliance.roomId}}">{{appliance.roomId}}</a>
+        <div ng-show="appliance.room">
+            <strong>placed in:</strong>
+            <a href="#{{appliance.room.self}}"
+               tooltip="room id: {{appliance.room.id}}">
+                {{appliance.room.name}}
+            </a>
+        </div>
+        <div ng-show="!appliance.room">
+            Not placed in any room
+        </div>
     </li>
     <li ng-repeat="(propertyName, property) in appliance.properties" class="list-group-item">
         <concise-appliance-property appliance-url="appliance.self" property="property"

@@ -1,6 +1,7 @@
 package com.thoughtcrafters.homie.infrastructure.http.appliances;
 
 import com.thoughtcrafters.homie.application.AppliancesApplicationService;
+import com.thoughtcrafters.homie.application.FullAppliance;
 import com.thoughtcrafters.homie.domain.appliances.Appliance;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import io.dropwizard.jersey.PATCH;
@@ -16,6 +17,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/appliances")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,14 +39,17 @@ public class AppliancesResource {
     }
 
     @GET
-    public Appliance[] getAllAppliances() {
-        return appliancesApplicationService.getAllAppliances().toArray(new Appliance[]{});
+    public List<ApplianceResponse> getAllAppliances() {
+        return appliancesApplicationService.getAllAppliances().stream()
+                .map(ApplianceResponse::fromFullAppliance)
+                .collect(Collectors.toList());
     }
 
     @GET
     @Path("/{applianceId}")
-    public Appliance getAppliance(@PathParam("applianceId") UUIDParam applianceId) {
-        return appliancesApplicationService.getApplianceWith(new ApplianceId(applianceId.get()));
+    public ApplianceResponse getAppliance(@PathParam("applianceId") UUIDParam applianceId) {
+        FullAppliance fullAppliance = appliancesApplicationService.getApplianceWith(new ApplianceId(applianceId.get()));
+        return ApplianceResponse.fromFullAppliance(fullAppliance);
     }
 
     @PATCH

@@ -9,6 +9,8 @@ import com.thoughtcrafters.homie.HomieApplication;
 import com.thoughtcrafters.homie.HomieConfiguration;
 import com.thoughtcrafters.homie.domain.appliances.ApplianceId;
 import com.thoughtcrafters.homie.domain.behaviours.SwitchState;
+import com.thoughtcrafters.homie.domain.rooms.Point;
+import com.thoughtcrafters.homie.domain.rooms.RoomId;
 import com.thoughtcrafters.homie.infrastructure.persistence.sqlite.SqliteConnectionFactory;
 import com.thoughtcrafters.homie.infrastructure.persistence.sqlite.SqliteDbRebuildCommand;
 import io.dropwizard.testing.junit.ConfigOverride;
@@ -485,6 +487,29 @@ public class LightsAcceptanceTest extends AcceptanceTest {
                                     .put("self", "/appliances/" + secondLightOffId.uuid())
                                     .build()
                 );
+    }
+
+    @Test
+    public void getAllForAppliancePlacedInARoomReturnsRoomDataInReponse() throws Exception {
+        // given
+        ApplianceId lightId = aLightHasBeenCreatedWith("lightName", false);
+        RoomId roomId = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
+        anApplianceHasBeenAddedToTheRoom(roomId, lightId, new Point(5, 6));
+
+        // when
+        ClientResponse response = Client.create()
+                                        .resource(appliancesUri().build())
+                                        .get(ClientResponse.class);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK_200);
+        List<Map<String, Object>> entity = response.getEntity(List.class);
+        assertThat(entity).hasSize(1);
+        assertThat(entity.get(0))
+                .containsEntry("room", ImmutableMap.of("id", roomId.uuid().toString(),
+                                                       "name", "aRoomName",
+                                                       "self", roomsUri(roomId).build().getPath()));
+
     }
 
     @Override

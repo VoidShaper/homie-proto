@@ -46,7 +46,8 @@ public class HomieApplication extends Application<HomieConfiguration> {
         DBI dbi = SqliteConnectionFactory.jdbiConnectionTo(configuration.dbPath());
 
         SqliteApplianceRepository applianceRepository = new SqliteApplianceRepository(dbi);
-        RoomsApplicationService roomsApplicationService = new RoomsApplicationService(new SqliteRoomRepository(dbi),
+        SqliteRoomRepository roomsRepository = new SqliteRoomRepository(dbi);
+        RoomsApplicationService roomsApplicationService = new RoomsApplicationService(roomsRepository,
                                                                                       applianceRepository);
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule homieModule = new SimpleModule("HomieModule");
@@ -60,7 +61,8 @@ public class HomieApplication extends Application<HomieConfiguration> {
         environment.jersey().register(new LightNotFoundExceptionMapper());
         environment.jersey().register(new PropertyUpdateNotAvailableExceptionMapper());
         environment.jersey().register(new ApplianceTypeNotSupportedExceptionMapper());
-        environment.jersey().register(new AppliancesResource(new AppliancesApplicationService(applianceRepository)));
+        environment.jersey().register(new AppliancesResource(
+                new AppliancesApplicationService(applianceRepository, roomsRepository)));
         environment.jersey()
                    .register(new RoomsResource(roomsApplicationService,
                                                environment.getObjectMapper()));

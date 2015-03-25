@@ -28,10 +28,7 @@ angular.module('homieApp')
                     placement: scope.placement,
                     html: true
                 };
-                $(element).popover(options)
-                    .click(function (e) {
-                        $(this).popover('show');
-                    });
+                $(element).popover(options);
             },
             scope: {
                 appliance: '=',

@@ -101,7 +101,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void addsAnApplianceToTheRoomWithAPatch() throws IOException {
+    public void placesAnApplianceInTheRoomWithAPatch() throws IOException {
         // given
         ApplianceId lightId = aLightHasBeenCreatedWith("lightName", false);
         RoomId id = aRoomHasBeenCreatedWith("aRoomName", rectangle20x20());
@@ -120,7 +120,9 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                                                                                "y", num(6)))));
 
         assertThat(aLightResponseFor(lightId))
-                .containsEntry("roomId", id.uuid().toString());
+                .containsEntry("room", ImmutableMap.of("id", id.uuid().toString(),
+                                                       "name", "aRoomName",
+                                                       "self", roomsUri(id).build().getPath()));
     }
 
     @Test
@@ -168,7 +170,9 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                 .isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aLightResponseFor(lightId))
-                .containsEntry("roomId", roomId.uuid().toString());
+                .containsEntry("room", ImmutableMap.of("id", roomId.uuid().toString(),
+                                                       "name", "aFirstPlacementRoom",
+                                                       "self", roomsUri(roomId).build().getPath()));
 
         assertThat(aRoomResponseFor(roomId))
                 .containsEntry("appliances",
@@ -196,7 +200,9 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
                 .isEqualTo(HttpStatus.NO_CONTENT_204);
 
         assertThat(aLightResponseFor(lightId))
-                .containsEntry("roomId", secondRoomId.uuid().toString());
+                .containsEntry("room", ImmutableMap.of("id", secondRoomId.uuid().toString(),
+                                                       "name", "aSecondPlacementRoom",
+                                                       "self", roomsUri(secondRoomId).build().getPath()));
 
         assertThat(aRoomResponseFor(secondRoomId))
                 .containsEntry("appliances",
