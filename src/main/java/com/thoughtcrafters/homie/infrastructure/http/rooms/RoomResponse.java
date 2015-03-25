@@ -15,12 +15,18 @@ import java.util.stream.Collectors;
 public class RoomResponse {
     private UUID id;
     private String name;
+    private String self;
     private Map<UUID, Map<String, PointBody>> appliances;
     private List<PointBody> shape;
 
-    private RoomResponse(UUID id, String name, Map<UUID, Map<String, PointBody>> appliances, List<PointBody> shape) {
+    private RoomResponse(UUID id,
+                         String name,
+                         String self,
+                         Map<UUID, Map<String, PointBody>> appliances,
+                         List<PointBody> shape) {
         this.id = id;
         this.name = name;
+        this.self = self;
         this.appliances = appliances;
         this.shape = shape;
     }
@@ -33,6 +39,10 @@ public class RoomResponse {
         return name;
     }
 
+    public String getSelf() {
+        return self;
+    }
+
     public Map<UUID, Map<String, PointBody>> getAppliances() {
         return appliances;
     }
@@ -41,18 +51,11 @@ public class RoomResponse {
         return shape;
     }
 
-    public static RoomResponse withoutIdFrom(Room room) {
-        return new RoomResponse(
-                null,
-                room.name(),
-                map(room.appliances()),
-                pointBodyFrom(room));
-    }
-
     public static RoomResponse withIdFrom(Room room) {
         return new RoomResponse(
                 room.id().uuid(),
                 room.name(),
+                "/rooms/" + room.id().uuid(),
                 map(room.appliances()),
                 pointBodyFrom(room));
     }

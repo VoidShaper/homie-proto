@@ -61,8 +61,7 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
     public void createsARoomCorrectly() throws JsonProcessingException {
         // given
         String requestEntity = jsonFrom(
-                ImmutableMap.<String, Object>of("name",
-                                                "roomName",
+                ImmutableMap.<String, Object>of("name", "roomName",
                                                 "shape", rectangle20x20()));
 
         // when
@@ -95,6 +94,8 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat(response.getEntity(Map.class))
                 .isEqualTo(ImmutableMap.of(
                         "name", "aRoomName",
+                        "self", roomsUri(id).build().getPath(),
+                        "id", id.uuid().toString(),
                         "appliances", ImmutableMap.of(),
                         "shape", rectangle20x20()
                 ));
@@ -121,8 +122,8 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
 
         assertThat(aLightResponseFor(lightId))
                 .containsEntry("room", ImmutableMap.of("id", id.uuid().toString(),
-                                                       "name", "aRoomName",
-                                                       "self", roomsUri(id).build().getPath()));
+                                                       "self", roomsUri(id).build().getPath(),
+                                                       "name", "aRoomName"));
     }
 
     @Test
@@ -230,10 +231,12 @@ public class RoomsAcceptanceTest extends AcceptanceTest {
         assertThat((List<Map<String, Object>>) clientResponse.getEntity(List.class))
                 .containsOnly(
                         ImmutableMap.of("name", "nameOne",
+                                        "self", roomsUri(id1).build().getPath(),
                                         "appliances", ImmutableMap.of(),
                                         "id", id1.uuid().toString(),
                                         "shape", rectangle20x20()),
                         ImmutableMap.of("name", "nameTwo",
+                                        "self", roomsUri(id2).build().getPath(),
                                         "appliances", ImmutableMap.of(),
                                         "id", id2.uuid().toString(),
                                         "shape", polygon5p()));

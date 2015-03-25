@@ -54,7 +54,7 @@ public class RoomsResource {
     @Path("/{roomId}")
     public RoomResponse getRoom(@PathParam("roomId") UUIDParam roomId) {
         Room room = roomsApplicationService.getTheRoomWith(new RoomId(roomId.get()));
-        return RoomResponse.withoutIdFrom(room);
+        return RoomResponse.withIdFrom(room);
     }
 
     @PATCH
