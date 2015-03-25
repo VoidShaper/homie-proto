@@ -5,16 +5,10 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.thoughtcrafters.homie.application.AppliancesApplicationService;
 import com.thoughtcrafters.homie.application.RoomTask;
 import com.thoughtcrafters.homie.application.RoomsApplicationService;
-import com.thoughtcrafters.homie.domain.appliances.lights.Light;
-import com.thoughtcrafters.homie.domain.appliances.properties.EnumProperty;
-import com.thoughtcrafters.homie.domain.appliances.properties.IntegerProperty;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.ApplianceTypeNotSupportedExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.AppliancesResource;
-import com.thoughtcrafters.homie.infrastructure.http.appliances.properties.EnumAppliancePropertySerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.LightNotFoundExceptionMapper;
-import com.thoughtcrafters.homie.infrastructure.http.appliances.LightSerializer;
 import com.thoughtcrafters.homie.infrastructure.http.appliances.PropertyUpdateNotAvailableExceptionMapper;
-import com.thoughtcrafters.homie.infrastructure.http.appliances.properties.IntegerAppliancePropertySerializer;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomNotFoundExceptionMapper;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomTaskDeserializer;
 import com.thoughtcrafters.homie.infrastructure.http.rooms.RoomsResource;
@@ -51,9 +45,6 @@ public class HomieApplication extends Application<HomieConfiguration> {
                                                                                       applianceRepository);
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
         SimpleModule homieModule = new SimpleModule("HomieModule");
-        homieModule.addSerializer(Light.class, new LightSerializer());
-        homieModule.addSerializer(EnumProperty.class, new EnumAppliancePropertySerializer());
-        homieModule.addSerializer(IntegerProperty.class, new IntegerAppliancePropertySerializer());
         homieModule.addDeserializer(RoomTask.class, new RoomTaskDeserializer(roomsApplicationService));
         environment.getObjectMapper().registerModule(homieModule);
 
